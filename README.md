@@ -4,4 +4,6 @@
 
 ### Autor de los cambios
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Nemn120_restgen-backend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Nemn120_restgen-backend)
+
 - [Álvaro Fernando Chávez](https://github.com/Nemn120)
