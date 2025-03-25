@@ -1,0 +1,71 @@
+name: CD - GitHub Docker Packages & Deploy Render
+on:
+  push:
+    branches: [develop]
+
+env:
+  REPOSITORY: ${{ github.repository }}  # El mismo para GitHub & AWS ECR
+  GHCR_URL: ghcr.io # GitHub Container Registry
+  AWS_ECR_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+jobs:
+  cd:
+    name: Build & Push GitHub Package & Deploy on Render Docker Image
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+          cache: maven
+
+      - name: Extract version from pom.xml
+        id: get-version
+        run: echo "VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Normalize repository name
+        run: echo "REPOSITORY=$(echo ${{ env.REPOSITORY }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GHCR_URL }}
+          username: ${{ github.actor }}
+          # 1º Creación del Token de Acceso Personal
+          #    Cuenta de GitHub >> Developer settings >> Personal access tokens >> Tokens >> Generate new token
+          #    write:packages & read:packages & delete:packages & repo
+          # 2º Configuración de Secrets en GitHub
+          #    repositorio en GitHub >> settings >> secrets and variables >> actions >> new repository secret
+          password: ${{ secrets.GHCR_PERSONAL_ACCESS_TOKEN }}
+
+      - name: Build & Push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.GHCR_URL }}/${{ env.REPOSITORY }}:${{ env.VERSION }}
+            ${{ env.GHCR_URL }}/${{ env.REPOSITORY }}:latest
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login in AWS ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Tag and Push AWS ECR
+        run: |
+          docker tag $REPOSITORY:$VERSION $AWS_ECR_URL/$REPOSITORY:latest
+          docker push $AWS_ECR_URL/$REPOSITORY:latest
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service --cluster devops-cluster --service deployed-aws-ecs-service --force-new-deployment
