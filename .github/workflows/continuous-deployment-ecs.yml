@@ -1,16 +1,17 @@
-name: CD - GitHub Docker Packages & Deploy Render
+name: CD - GitHub Docker Packages & Deploy AWS ECS
+
 on:
   push:
     branches: [feature/issue#6]
 
 env:
-  REPOSITORY: ${{ github.repository }}  # El mismo para GitHub & AWS ECR
-  GHCR_URL: ghcr.io # GitHub Container Registry
+  REPOSITORY: ${{ github.repository }}
+  GHCR_URL: ghcr.io  # GitHub Container Registry
   AWS_ECR_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
 
 jobs:
   cd:
-    name: Build & Push GitHub Package & Deploy on Render Docker Image
+    name: Build & Push GitHub Package & Deploy on AWS ECS
     runs-on: ubuntu-22.04
     steps:
       - name: Clone repository
@@ -32,19 +33,19 @@ jobs:
       - name: Normalize repository name
         run: echo "REPOSITORY=$(echo ${{ env.REPOSITORY }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
+      - name: Build project and package JAR
+        run: |
+          mvn -f generator/pom.xml clean package -DskipTests
+          ls -l generator/target/
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.GHCR_URL }}
           username: ${{ github.actor }}
-          # 1º Creación del Token de Acceso Personal
-          #    Cuenta de GitHub >> Developer settings >> Personal access tokens >> Tokens >> Generate new token
-          #    write:packages & read:packages & delete:packages & repo
-          # 2º Configuración de Secrets en GitHub
-          #    repositorio en GitHub >> settings >> secrets and variables >> actions >> new repository secret
           password: ${{ secrets.GHCR_PERSONAL_ACCESS_TOKEN }}
 
-      - name: Build & Push Docker image
+      - name: Build & Push Docker image to GitHub Container Registry
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -59,11 +60,14 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - name: Login in AWS ECR
+
+      - name: Login to AWS ECR
         uses: aws-actions/amazon-ecr-login@v2
-      - name: Tag and Push AWS ECR
+
+      - name: Build & Push Docker image to AWS ECR
         run: |
-          docker tag $REPOSITORY:$VERSION $AWS_ECR_URL/$REPOSITORY:latest
+          docker build -t $AWS_ECR_URL/$REPOSITORY:$VERSION -t $AWS_ECR_URL/$REPOSITORY:latest .
+          docker push $AWS_ECR_URL/$REPOSITORY:$VERSION
           docker push $AWS_ECR_URL/$REPOSITORY:latest
 
       - name: Update ECS service
