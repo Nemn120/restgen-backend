@@ -1,0 +1,5 @@
+generator/target/
+*.iml
+*.log
+*.md
+.git
