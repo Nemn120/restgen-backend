@@ -1,7 +1,7 @@
 name: CD - GitHub Docker Packages & Deploy Render
 on:
   push:
-    branches: [issue#6]
+    branches: [feature/issue#6]
 
 env:
   REPOSITORY: ${{ github.repository }}  # El mismo para GitHub & AWS ECR
