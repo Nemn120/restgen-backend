@@ -8,6 +8,7 @@ env:
   REPOSITORY: ${{ github.repository }}
   GHCR_URL: ghcr.io  # GitHub Container Registry
   AWS_ECR_URL: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
 
 jobs:
   cd:
