@@ -32,15 +32,15 @@ public class UserInfoService {
         this.repository.save(user);
     }
 
-    private void assertNoExistByEmail(String mobile) {
-        if (this.repository.findByEmail(mobile).isPresent()) {
-            throw new ConflictException("The mobile already exists: " + mobile);
+    private void assertNoExistByEmail(String email) {
+        if (this.repository.findByEmail(email).isPresent()) {
+            throw new ConflictException("The email already exists: " + email);
         }
     }
 
     public UserInfo findByEmailAssured(String email) {
         return this.repository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("The mobile don't exist: " + email));
+                .orElseThrow(() -> new NotFoundException("The email don't exist: " + email));
     }
 
 }
