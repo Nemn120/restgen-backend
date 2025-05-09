@@ -39,6 +39,9 @@ jobs:
           mvn -f generator/pom.xml clean package -DskipTests
           ls -l generator/target/
 
+      - name: Debug Environment Variables
+        run: echo "MongoDB URI= ${{ secrets.MONGODB_URI }}"
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
