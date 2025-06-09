@@ -1,0 +1,165 @@
+name: "Proyecto 1"
+description: "Descripción del Proyecto 1"
+urlRepository: "https://github.com/proyecto1"
+plantUmlDiagram: "https://plantuml.com/proyecto1"
+isPrivate: false
+creationUser: "user1"
+updateUser: "user2"
+properties:
+  application:
+    port: 8080
+    basePath: "/api/v1"
+  documentation:
+    title: "Documentación Proyecto 1"
+    description: "Descripción de la documentación del Proyecto 1"
+    version: "1.0.0"
+  maven:
+    groupId: "com.example"
+    artifactId: "proyecto1"
+    version: "1.0.0"
+  database:
+    type: "H2"
+    showSql: true
+  security:
+    enabled: true
+    secretKey: "JWTascas"
+classes:
+  - name: "ExpedienteClave"
+    entity:
+      tableName: "EXPEDIENTE_CLAVE"
+      extendsClass: "AUDITABLE_ENTITY"
+      options:
+        inheritanceStrategy: "SINGLE_TABLE"
+        uniqueConstraints:
+          - "CODIGO"
+          - "TIPO"
+        discriminator:
+          column:
+            name: "TIPO"
+            type: "STRING"
+            length: 80
+          options:
+            force: true
+            insert: false
+        sequence:
+          create: true
+          name: "CLAVE_SEQUENCE"
+          increment: 2
+        isAudited: true
+      columns:
+        - property:
+            name: "expediente"
+            type: "Expediente"
+            visibility: "PROTECTED"
+          column:
+            name: "ID_EXPEDIENTE"
+            length: "80"
+            precision: 12
+            scale: 2
+            unique: true
+            foreignkey: true
+            nullable: false
+          relation:
+            type: "MANY_TO_ONE"
+            fetch: "LAZY"
+            joinColumnReferenced: "ID"
+            notAudited: true
+        - property:
+            name: "clave"
+            type: "Clave"
+            visibility: "PROTECTED"
+          column:
+            name: null
+            length: null
+            precision: null
+            scale: null
+            unique: null
+            foreignkey: true
+            nullable: true
+          relation:
+            type: "ONE_TO_ONE"
+            fetch: "LAZY"
+            joinColumnReferenced: "ID"
+        - property:
+            name: "descripcion"
+            type: "STRING"
+            visibility: "PUBLIC"
+          column:
+            name: "DESCRIPCION"
+            length: 150
+            precision: null
+            scale: null
+            unique: true
+            foreignkey: false
+            nullable: true
+          relation:
+            type: null
+            fetch: null
+            joinColumnReferenced: null
+  - name: "Clave"
+    entity:
+      tableName: "CLAVE"
+      extendsClass: "AUDITABLE_ENTITY"
+      options:
+        uniqueConstraints:
+          - "CODIGO"
+          - "TIPO"
+        discriminator:
+          column:
+            name: "TIPO"
+            type: "STRING"
+            length: 50
+          options:
+            force: true
+            insert: false
+        sequence:
+          create: true
+          name: "CLAVE_SEQUENCE"
+          increment: 2
+        isAudited: true
+      columns:
+        - property:
+            name: "codigo"
+            type: "STRING"
+            visibility: "PUBLIC"
+          column:
+            name: "CODIGO"
+            length: 5
+            nullable: false
+          relation:
+            notAudited: true
+        - property:
+            name: "nombre"
+            type: "STRING"
+            visibility: "PUBLIC"
+          column:
+            name: "NOMBRE"
+            length: 50
+            nullable: false
+        - property:
+            name: "fechaBaja"
+            type: "DATE"
+            visibility: "PUBLIC"
+          column:
+            name: "FECHA_BAJA"
+            nullable: true
+  - name: "ClaveEdificacion"
+    entity:
+      tableName: "CLAVE_EDIFICACION"
+      extendsClass: "Clave"
+      options:
+        uniqueConstraints:
+          - "CODIGO"
+          - "TIPO"
+        sequence:
+          create: true
+        isAudited: true
+      columns:
+        - property:
+            name: "tipoConstruccion"
+            type: "STRING"
+            visibility: "PUBLIC"
+          column:
+            name: "TIPO_CONSTRUCCION"
+            length: 150
+            nullable: true

@@ -1,0 +1,67 @@
+package es.achavez.miw.tfm.restgen.generator.application.service.generator.classes;
+
+import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.MavenProjectPath;
+import es.achavez.miw.tfm.restgen.generator.domain.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jboss.forge.roaster.model.source.JavaClassSource;
+
+import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.AUDITABLE_ENTITY;
+
+public class DTODecorator<T extends JavaClassSource> extends JavaClassAbstractDecorator<T> {
+
+    private static final Logger logger = LogManager.getLogger(EntityClassDecorator.class);
+
+    public DTODecorator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+        super(javaClassSource, javaClass, mavenProjectPath);
+        this.directoryLayerPath = DirectoryLayerPath.DTO;
+    }
+
+    @Override
+    public void decorate() {
+        super.decorate();
+
+        String dtoClassName = packageDirectory.getNameClassLayer(DirectoryLayerPath.DTO);
+        String primaryKeyType = DataTypes.LONG.getName();
+        getJavaClassSource().setName(dtoClassName);
+
+        addImport(AnnotationPersistence.LOMBOK_GETTER);
+        addImport(AnnotationPersistence.LOMBOK_SETTER);
+
+        addAnnotationAndImport(AnnotationPersistence.LOMBOK_GETTER);
+        addAnnotationAndImport(AnnotationPersistence.LOMBOK_SETTER);
+
+        getJavaClassSource().setSuperType("AuditableDTO<" + primaryKeyType + ">");
+
+        for (Column column : javaClass.getEntity().getColumns()) {
+            if (column.getPropertyDTO() != null) {
+                getJavaClassSource().addField()
+                        .setName(column.getPropertyDTO().getName())
+                        .setType(column.getPropertyDTO().getType())
+                        .setPrivate();
+            } else {
+                DataTypes dataTypes = DataTypes.valueOf(column.getProperty().getType());
+                if(dataTypes.getImportPath() != null){
+                    javaClassSource.addImport(dataTypes.getImportPath());
+                }
+                getJavaClassSource().addField()
+                        .setName(column.getProperty().getName())
+                        .setType(dataTypes.getName())
+                        .setPrivate();
+            }
+        }
+
+        addExtendsAuditableEntity();
+    }
+
+    private void addExtendsAuditableEntity() {
+        EntityClass entityClass = javaClass.getEntity();
+        if(AUDITABLE_ENTITY.name().equals(entityClass.getExtendsClass())){
+            addExtendsWithoutPackage(AnnotationPersistence.AUDITABLE_DTO);
+        }
+    }
+
+    protected void addExtendsWithoutPackage(AnnotationPersistence abstractIdAuditableEntity) {
+        getJavaClassSource().setSuperType(abstractIdAuditableEntity.getAnnotationName());
+    }
+}

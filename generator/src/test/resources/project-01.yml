@@ -1,0 +1,142 @@
+name: "Proyecto 1"
+description: "Descripción del Proyecto 1"
+status: "ACTIVE"
+urlRepository: "https://github.com/proyecto1"
+plantUmlDiagram: "https://plantuml.com/proyecto1"
+isPrivate: false
+creationDate: "2023-01-01T10:00:00"
+updateDate: "2023-01-02T12:00:00"
+creationUser: "user1"
+updateUser: "user2"
+properties:
+  application:
+    port: 8080
+    basePath: "/api/v1"
+  documentation:
+    title: "Documentación Proyecto 1"
+    description: "Descripción de la documentación del Proyecto 1"
+    version: "1.0.0"
+  maven:
+    groupId: "com.example"
+    artifactId: "proyecto1"
+    versionId: "1.0.0"
+database:
+  type: "H2"
+  showSql: true
+security:
+  enabled: true
+  secretKey: "JWTascas"
+classes:
+  - name: "ExpedienteClave"
+    entityClass:
+      tableName: "EXPEDIENTE_CLAVE"
+      extendsClass: "ABSTRACT_ID_AUDITABLE_ENTITY"
+      options:
+        inheritance:
+          strategy: "SINGLE_TABLE"
+        uniqueConstraints:
+          - "CODIGO"
+          - "TIPO"
+        discriminator:
+          column:
+            name: "TIPO"
+            type: "STRING"
+            length: 80
+          options:
+            force: true
+            insert: false
+        sequence:
+          create: true
+          name: "CLAVE_SEQUENCE"
+          increment: 2
+        isAudited: true
+      columns:
+        - propertyName: "expediente"
+          propertyType: null
+          isProtected: null
+          isRelationNotAudited: true
+          columnName: "ID_EXPEDIENTE"
+          columnLength: null
+          columnPrecision: null
+          columnScale: null
+          columnUnique: null
+          isForeignKey: true
+          relation: "MANY_TO_ONE"
+          relationFetch: "LAZY"
+          joinColumnReferenced: "ID"
+          isNullable: false
+          propertyRelationType: "Expediente"
+        - propertyName: "clave"
+          propertyType: null
+          isProtected: null
+          isRelationNotAudited: null
+          columnName: null
+          columnLength: null
+          columnPrecision: null
+          columnScale: null
+          columnUnique: null
+          isForeignKey: true
+          relation: "ONE_TO_ONE"
+          relationFetch: "LAZY"
+          joinColumnReferenced: "ID"
+          isNullable: true
+          propertyRelationType: "Clave"
+        - propertyName: "descripcion"
+          propertyType: "STRING"
+          isProtected: null
+          isRelationNotAudited: null
+          columnName: "DESCRIPCION"
+          columnLength: 150
+          columnUnique: true
+          isForeignKey: false
+          relation: null
+          relationFetch: null
+          joinColumnReferenced: null
+          isNullable: true
+          propertyRelationType: null
+  - name: "Clave"
+    entityClass:
+      tableName: "CLAVE"
+      extendsClass: "ABSTRACT_ID_AUDITABLE_ENTITY"
+      uniqueConstraints:
+        - "CODIGO"
+        - "TIPO"
+      isInheritance: true
+      createSequence: true
+      inheritanceStrategy: "SINGLE_TABLE"
+      discriminatorColumnName: "TIPO"
+      discriminatorColumnLength: 50
+      discriminatorColumnType: "STRING"
+      isDiscriminatorOptionsForce: true
+      isAudited: true
+      columns:
+        - propertyName: "codigo"
+          propertyType: "STRING"
+          isRelationNotAudited: true
+          columnName: "CODIGO"
+          columnLength: 5
+          isNullable: false
+        - propertyName: "nombre"
+          propertyType: "STRING"
+          columnName: "NOMBRE"
+          columnLength: 50
+          isNullable: true
+        - propertyName: "fechaBaja"
+          propertyType: "DATE"
+          columnName: "FECHA_BAJA"
+  - name: "ClaveEdificacion"
+    entityClass:
+      extendsClass: "Clave"
+      discriminatorValue: "EDIFICACION"
+      createSequence: false
+      columns:
+        - propertyName: "tipoConstruccion"
+          propertyRelationType: "TipoConstruccion"
+          columnName: "ID_TIPO_CONSTRUCCION"
+          relation: "MANY_TO_ONE"
+          relationFetch: "LAZY"
+          joinColumnReferenced: "ID"
+          isForeignKey: true
+        - propertyName: "plazoAmortizacion"
+          propertyType: "INTEGER"
+          columnName: "PLAZO_AMORTIZACION"
