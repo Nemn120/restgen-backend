@@ -2,7 +2,7 @@ package es.achavez.miw.tfm.restgen.generator.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import persistence.FetchType;
+import jakarta.persistence.FetchType;
 
 @Getter
 @Setter

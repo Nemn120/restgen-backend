@@ -82,12 +82,12 @@ public class GeneratedJavaClass {
         final JavaClassSource dto = Roaster.create(JavaClassSource.class);
         DTODecorator serviceClassDecorator = new DTODecorator(dto, javaClass, mavenProjectPath);
         serviceClassDecorator.decorate();
-        generateFile(serviceClassDecorator.getJavaClassSource(), mavenProjectPath.getServiceMainPath());
+        generateFile(serviceClassDecorator.getJavaClassSource(), mavenProjectPath.getDTOMainPath());
     }
 
     private void generateMapper(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate Mapper");
-        final JavaClassSource mapper = Roaster.create(JavaClassSource.class);
+        final JavaInterfaceSource mapper = Roaster.create(JavaInterfaceSource.class);
         MapperDecorator mapperDecorator = new MapperDecorator(mapper, javaClass, mavenProjectPath);
         mapperDecorator.decorate();
         generateFile(mapperDecorator.getJavaClassSource(), mavenProjectPath.getMapperMainPath());

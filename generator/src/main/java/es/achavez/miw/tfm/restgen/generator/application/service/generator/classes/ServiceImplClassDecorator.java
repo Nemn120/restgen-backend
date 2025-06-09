@@ -51,11 +51,10 @@ public class ServiceImplClassDecorator<T extends JavaClassSource> extends JavaCl
                 .append(", ")
                 .append(packageDirectory.getNameClassLayer(DirectoryLayerPath.DTO))
                 .append(", ")
-                .append(DataTypes.INTEGER.getName())
+                .append(DataTypes.LONG.getName())
                 .append(">");
         getJavaClassSource().setSuperType(extendsGestionGenericService.toString());
-
-        getJavaClassSource().addInterface(serviceName);
+        getJavaClassSource().addInterface(packageDirectory.getNameClassLayer(DirectoryLayerPath.SERVICE));
 
         FieldSource<JavaClassSource> repoField = getJavaClassSource().addField();
         repoField.setName("repo");
@@ -72,7 +71,7 @@ public class ServiceImplClassDecorator<T extends JavaClassSource> extends JavaCl
         MethodSource<JavaClassSource> getRepoMethod = getJavaClassSource().addMethod();
         getRepoMethod.setName("getRepo");
         getRepoMethod.setReturnType("GenericRepository<" +
-                                    packageDirectory.getNameClassLayer(DirectoryLayerPath.ENTITY) + ", Integer>");
+                                    packageDirectory.getNameClassLayer(DirectoryLayerPath.ENTITY) + ", "+DataTypes.LONG.getName()+">");
         getRepoMethod.setVisibility(Visibility.PROTECTED);
         getRepoMethod.addAnnotation(Override.class);
         getRepoMethod.setBody("return repo;");
@@ -88,7 +87,7 @@ public class ServiceImplClassDecorator<T extends JavaClassSource> extends JavaCl
 
         MethodSource<JavaClassSource> extractIdMethod = getJavaClassSource().addMethod();
         extractIdMethod.setName("extractIdFromDto");
-        extractIdMethod.setReturnType("Long");
+        extractIdMethod.setReturnType(DataTypes.LONG.getName());
         extractIdMethod.setVisibility(Visibility.PROTECTED);
         extractIdMethod.addAnnotation(Override.class);
         extractIdMethod.addParameter(packageDirectory.getNameClassLayer(DirectoryLayerPath.DTO), "dto");

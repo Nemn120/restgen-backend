@@ -21,15 +21,15 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
     public void decorate() {
         super.decorate();
         String controllerImplName = packageDirectory.getNameClassLayer(DirectoryLayerPath.CONTROLLER_IMPL);
-        String controllerName = packageDirectory.getNameClassLayer(DirectoryLayerPath.CONTROLLER_IMPL);
-        String serviceName = packageDirectory.getNameClassLayer(DirectoryLayerPath.SERVICE);
+        String controllerName = packageDirectory.getNameClassLayer(DirectoryLayerPath.CONTROLLER);
         String dtoName = packageDirectory.getNameClassLayer(DirectoryLayerPath.ENTITY) + "DTO";
 
         getJavaClassSource().setName(controllerImplName);
-        getJavaClassSource().setSuperType(controllerName);
+        getJavaClassSource().addInterface(controllerName);
         addAnnotationAndImport(AnnotationPersistence.REST_CONTROLLER);
         addAnnotationAndImport(AnnotationPersistence.REQUEST_MAPPING).setStringValue("value", "/" + javaClass.getName().toLowerCase());
 
+        addImport(DirectoryLayerPath.CONTROLLER);
         addSubPackageImport(RESPONSE_CUSTOM_PAGE);
         addSubPackageImport(GENERIC_RESPONSE);
         addSubPackageImport(RESPONSE_ENTITY_UTIL);
@@ -39,32 +39,34 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         addImport(HTTP_STATUS);
         addImport(LOGGER);
         addImport(LOGGER_FACTORY);
-
-        addImport(OPERATION);
-        addImport(SORT);
         addImport(SORT_DIRECTION);
+        addImport(LIST);
+
         getJavaClassSource().addImport("org.springframework.data.domain.PageRequest");
         getJavaClassSource().addImport("org.springframework.data.domain.Pageable");
-        addImport(BIN_ANNOTATION);
 
+        addImport(BIN_ANNOTATION);
         addImport(DirectoryLayerPath.SERVICE);
         addImport(DirectoryLayerPath.DTO);
 
-        // Agregar campo para el servicio
+        getJavaClassSource().addField()
+                .setName("logger")
+                .setType(LOGGER.getAnnotationName())
+                .setVisibility(Visibility.PRIVATE)
+                .setLiteralInitializer("LoggerFactory.getLogger(" + controllerImplName + ".class)");
+
         getJavaClassSource().addField()
                 .setName("service")
-                .setType(serviceName)
+                .setType(packageDirectory.getNameClassLayer(DirectoryLayerPath.SERVICE))
                 .setVisibility(Visibility.PRIVATE)
                 .addAnnotation(AnnotationPersistence.AUTOWIRED.getAnnotationName());
 
-        // Generar métodos CRUD y otros
         generateFindByIdMethod(dtoName);
         generateFindAllMethod(dtoName);
         generateSaveMethod(dtoName);
         generateUpdateMethod(dtoName);
         generateDeleteMethod();
         generateSearchMethod(dtoName);
-        generateCountMethod(dtoName);
     }
 
     private void generateFindByIdMethod(String dtoName) {
@@ -142,18 +144,5 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         method.setBody("Pageable pageable = PageRequest.of(page - 1, size);\n" +
                        "CustomPage<" + dtoName + "> dtos = service.findByAttributesAndPaginationAndSort(filterDto, pageable, sortField, direction);\n" +
                        "return ResponseEntityUtil.createCustomPageResponse(dtos, \"Search found\", HttpStatus.OK);");
-    }
-
-    private void generateCountMethod(String dtoName) {
-        MethodSource<JavaClassSource> method = getJavaClassSource().addMethod();
-        method.setName("count")
-                .setReturnType("ResponseEntity<String>")
-                .setVisibility(Visibility.PUBLIC)
-                .addAnnotation(AnnotationPersistence.GET_MAPPING.getAnnotationName());
-
-        method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: count()\");\n" +
-                       dtoName + " filterDto = null; // Define el parámetro manualmente\n" +
-                       "long response = service.count(filterDto);\n" +
-                       "return ResponseEntity.ok(String.format(\"{\\n  \\\"count\\\": %s \\n}\", response));");
     }
 }

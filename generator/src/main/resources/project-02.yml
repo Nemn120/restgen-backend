@@ -163,3 +163,26 @@ classes:
             name: "TIPO_CONSTRUCCION"
             length: 150
             nullable: true
+  - name: "Expediente"
+    entity:
+      tableName: "EXPEDIENTE"
+      options:
+        sequence:
+          create: true
+      columns:
+        - property:
+            name: "nombre"
+            type: "STRING"
+            visibility: "PUBLIC"
+          column:
+            name: "NOMBRE"
+            length: 150
+            nullable: true
+        - property:
+            name: "tipo"
+            type: "STRING"
+            visibility: "PUBLIC"
+          column:
+             name: "TIPO"
+             length: 150
+             nullable: true

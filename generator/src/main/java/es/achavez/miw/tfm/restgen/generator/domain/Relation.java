@@ -2,9 +2,9 @@ package es.achavez.miw.tfm.restgen.generator.domain;
 
 public enum Relation {
 
-    MANY_TO_ONE("ManyToOne", "javax.persistence.ManyToOne"),
-    ONE_TO_ONE("OneToOne", "javax.persistence.OneToOne"),
-    ONE_TO_MANY("OneToMany", "javax.persistence.OneToMany");
+    MANY_TO_ONE("ManyToOne", "jakarta.persistence.ManyToOne"),
+    ONE_TO_ONE("OneToOne", "jakarta.persistence.OneToOne"),
+    ONE_TO_MANY("OneToMany", "jakarta.persistence.OneToMany");
 
     private String name;
     private String packageImport;

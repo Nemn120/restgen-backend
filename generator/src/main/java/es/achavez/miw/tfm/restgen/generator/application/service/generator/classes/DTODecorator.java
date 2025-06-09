@@ -22,16 +22,13 @@ public class DTODecorator<T extends JavaClassSource> extends JavaClassAbstractDe
         super.decorate();
 
         String dtoClassName = packageDirectory.getNameClassLayer(DirectoryLayerPath.DTO);
-        String primaryKeyType = DataTypes.LONG.getName();
         getJavaClassSource().setName(dtoClassName);
-
-        addImport(AnnotationPersistence.LOMBOK_GETTER);
-        addImport(AnnotationPersistence.LOMBOK_SETTER);
 
         addAnnotationAndImport(AnnotationPersistence.LOMBOK_GETTER);
         addAnnotationAndImport(AnnotationPersistence.LOMBOK_SETTER);
 
-        getJavaClassSource().setSuperType("AuditableDTO<" + primaryKeyType + ">");
+        //getJavaClassSource().setSuperType("AuditableDTO<" + primaryKeyType + ">");
+        addExtendsWithoutPackage(AnnotationPersistence.AUDITABLE_DTO);
 
         for (Column column : javaClass.getEntity().getColumns()) {
             if (column.getPropertyDTO() != null) {
@@ -50,8 +47,7 @@ public class DTODecorator<T extends JavaClassSource> extends JavaClassAbstractDe
                         .setPrivate();
             }
         }
-
-        addExtendsAuditableEntity();
+        //addExtendsAuditableEntity();
     }
 
     private void addExtendsAuditableEntity() {
@@ -62,6 +58,6 @@ public class DTODecorator<T extends JavaClassSource> extends JavaClassAbstractDe
     }
 
     protected void addExtendsWithoutPackage(AnnotationPersistence abstractIdAuditableEntity) {
-        getJavaClassSource().setSuperType(abstractIdAuditableEntity.getAnnotationName());
+        getJavaClassSource().setSuperType(abstractIdAuditableEntity.getAnnotationName()+ "<" + DataTypes.LONG.getName() + ">");
     }
 }

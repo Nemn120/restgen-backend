@@ -78,6 +78,13 @@ public final class GeneratorUtil {
 
         return str.substring(0, 1).toUpperCase().concat(str.substring(1));
     }
+    public static String convertLowerCaseFirstLetters(String str) {
+        if (str == null) {
+            return null;
+        }
+
+        return str.substring(0, 1).toLowerCase().concat(str.substring(1));
+    }
 
     public static String snakeCaseToCamelCase(String start) {
         StringBuffer sb = new StringBuffer();

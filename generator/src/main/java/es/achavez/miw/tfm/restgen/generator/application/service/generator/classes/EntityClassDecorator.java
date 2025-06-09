@@ -43,7 +43,6 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
             addInheritanceAnnotation();
             addDiscriminator();
             addSequenceGeneratorAnnotation();
-            addAuditedAnnotation();
         }
         addGetterAndSetter();
         addColumns();
@@ -56,12 +55,9 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
 
     private void addExtendsAuditableEntity() {
         EntityClass entityClass = javaClass.getEntity();
-        if (entityClass.getExtendsClass() == null || ABSTRACT_ID_ENTITY.name().equals(entityClass.getExtendsClass())) {
-            addExtendsWithoutPackage(ABSTRACT_ID_ENTITY);
-            logger.info("addExtendsAuditableEntity(): Generando extension de " + ABSTRACT_ID_ENTITY.getAnnotationName());
-        }else if(AUDITABLE_ENTITY.name().equals(entityClass.getExtendsClass())){
+        if (entityClass.getExtendsClass() == null || AUDITABLE_ENTITY.name().equals(entityClass.getExtendsClass())) {
             addExtendsWithoutPackage(AUDITABLE_ENTITY);
-            logger.info("addExtendsAuditableEntity(): Generando extension de " + AUDITABLE_ENTITY.getAnnotationName());
+            logger.info("addExtendsAuditableEntity(): Generando extension de " + ABSTRACT_ID_ENTITY.getAnnotationName());
         }else {
             getJavaClassSource().setSuperType(entityClass.getExtendsClass());
         }
@@ -69,12 +65,6 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
 
     protected void addExtendsWithoutPackage(AnnotationPersistence abstractIdAuditableEntity) {
         getJavaClassSource().setSuperType(abstractIdAuditableEntity.getAnnotationName());
-    }
-
-    private void addAuditedAnnotation() {
-        if (Boolean.TRUE.equals(options.getIsAudited())) {
-            addAnnotationAndImport(AUDITED_ENVERS);
-        }
     }
 
     private void addInheritanceAnnotation() {
@@ -160,15 +150,20 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
 
     private void addTableAnnotation() {
         logger.info("addTableAnnotation(): Generando Anotaciones a nivel de tabla");
-        if (entityClass.getTableName() != null) {
-            AnnotationSource<JavaClassSource> annotation = addAnnotationAndImport(TABLE);
-            annotation.setStringValue("name", entityClass.getTableName());
-            OptionsEntity options1 = entityClass.getOptions();
+        if(entityClass == null){
+            logger.warn("addTableAnnotation(): entityClass is null, cannot add table annotation");
+            return;
+        }
+        if (StringUtils.isBlank(entityClass.getTableName())) {
+            entityClass.setTableName(javaClass.getName().toUpperCase());
+        }
+        AnnotationSource<JavaClassSource> annotation = addAnnotationAndImport(TABLE);
+        annotation.setStringValue("name", entityClass.getTableName());
+        OptionsEntity options1 = entityClass.getOptions();
 
-            if (options1.getUniqueConstraints() != null && options1.getUniqueConstraints().length > 0) {
-                addImport(UNIQUE_CONSTRAINT);
-                annotation.setLiteralValue("uniqueConstraints", "@" + UNIQUE_CONSTRAINT.getAnnotationName() + "(columnNames = {\"" + String.join("\", \"", options1.getUniqueConstraints()) + "\"})");
-            }
+        if (options1.getUniqueConstraints() != null && options1.getUniqueConstraints().length > 0) {
+            addImport(UNIQUE_CONSTRAINT);
+            annotation.setLiteralValue("uniqueConstraints", "@" + UNIQUE_CONSTRAINT.getAnnotationName() + "(columnNames = {\"" + String.join("\", \"", options1.getUniqueConstraints()) + "\"})");
         }
     }
 
@@ -179,7 +174,6 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
         if (entityClass.getColumns() != null) {
             generateColumnFields(entityClass.getColumns());
         }
-
     }
 
     private void generateColumnFields(List<Column> columns) {
@@ -210,7 +204,6 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
         fieldSource.setType(column.getProperty().getType());
         addManyToOneRelation(fieldSource, relation);
         addJoinColumnAnnotation(fieldSource, column);
-        addNotAuditedAnnotationIfNeeded(fieldSource, relation);
     }
 
     private void addManyToOneRelation(FieldSource<JavaClassSource> fieldSource, RelationColumn relation) {
@@ -249,14 +242,6 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
         setColumnUnique(annotation, columnDefinition);
         setColumnPrecision(annotation, columnDefinition);
         setColumnScale(annotation, columnDefinition);
-    }
-
-    private void addNotAuditedAnnotationIfNeeded(FieldSource<JavaClassSource> fieldSource, RelationColumn relation) {
-        if (Boolean.TRUE.equals(relation.getNotAudited())) {
-            AnnotationSource<JavaClassSource> notAuditedAnnotation = fieldSource.addAnnotation(AUDITED_ENVERS.getAnnotationName());
-            javaClassSource.addImport(RELATION_TARGET_AUDITED_MODE_ENVERS.getPackageName());
-            notAuditedAnnotation.setLiteralValue("targetAuditMode", RELATION_TARGET_AUDITED_MODE_NOTAUDITED_ENVERS.getAnnotationName());
-        }
     }
 
     private void setColumnName(AnnotationSource<JavaClassSource> annotation, Column column) {

@@ -1,4 +1,4 @@
-package persistence;
+package jakarta.persistence;
 
 public enum FetchType {
 

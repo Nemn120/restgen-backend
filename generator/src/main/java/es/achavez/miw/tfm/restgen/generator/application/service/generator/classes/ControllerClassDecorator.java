@@ -25,12 +25,9 @@ public class ControllerClassDecorator<T extends JavaInterfaceSource> extends Jav
         getJavaClassSource().setName(interfaceName);
         addAnnotationAndImport(AnnotationPersistence.SECURITY_REQUIREMENT).setStringValue("name", "JWT");
         addImport(OPERATION);
-        addImport(SORT);
         addImport(SORT_DIRECTION);
         addSubPackageImport(RESPONSE_CUSTOM_PAGE);
         addSubPackageImport(GENERIC_RESPONSE);
-        addSubPackageImport(RESPONSE_ENTITY_UTIL);
-        addImport(RESPONSE_ENTITY_UTIL);
         addImport(RESPONSE_ENTITY);
 
         addImport(LIST);
@@ -42,7 +39,6 @@ public class ControllerClassDecorator<T extends JavaInterfaceSource> extends Jav
         generateUpdateMethod(dtoName);
         generateDeleteMethod(dtoName);
         generateSearchMethod(dtoName);
-        generateCountMethod(dtoName);
     }
 
     private void generateFindByIdMethod(String dtoName) {
@@ -94,14 +90,6 @@ public class ControllerClassDecorator<T extends JavaInterfaceSource> extends Jav
         method.addParameter("int size", "");
         method.addParameter("String sortField", "");
         method.addParameter("Direction direction", "");
-        method.addParameter(dtoName + " filterDto", "");
-    }
-
-    private void generateCountMethod(String dtoName) {
-        MethodSource<JavaInterfaceSource> method = getJavaClassSource().addMethod();
-        method.setName("count");
-        method.setReturnType("ResponseEntity<String>");
-        method.addAnnotation(OPERATION.getAnnotationName()).setStringValue("summary", "Buscar cantidad");
         method.addParameter(dtoName + " filterDto", "");
     }
 }

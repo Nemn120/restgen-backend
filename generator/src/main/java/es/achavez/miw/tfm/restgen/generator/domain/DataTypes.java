@@ -13,8 +13,6 @@ public enum DataTypes {
     BOOLEAN("Boolean",null),
     LOGGER("Logger", "java.util.logging.Logger");
 
-
-
     private final String name;
     private final String importPath;
 
