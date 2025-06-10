@@ -25,7 +25,8 @@ public class ConfigurationPath {
             String pathProject = properties.getProperty("path-project");
             if(StringUtils.hasText(pathProject)){
                 String userHome = System.getProperty("user.dir");
-                applicationPath = Paths.get(Paths.get(userHome).getParent().toString(), pathProject,uuid);
+                //applicationPath = Paths.get(Paths.get(userHome).getParent().toString(), pathProject,uuid);
+                applicationPath = Paths.get(Paths.get(userHome).toString(), pathProject,uuid);
                 if (!applicationPath.toFile().exists()){
                     applicationPath.toFile().mkdir();
                 }

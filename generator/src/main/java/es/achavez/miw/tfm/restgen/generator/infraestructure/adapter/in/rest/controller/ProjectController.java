@@ -63,7 +63,7 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/generate")
+    @PatchMapping("/generate")
     public ResponseEntity<String> generate(@RequestBody ProjectIdDTO generate) throws IOException {
         generatorService.execute(generate.id());
         return ResponseEntity.ok("Project generated");
@@ -73,6 +73,13 @@ public class ProjectController {
     public ResponseEntity<ProjectIdDTO> clone(@RequestBody ProjectIdDTO id) {
         String idProject = projectService.cloneProject(id.id());
         ProjectIdDTO projectIdDTO = new ProjectIdDTO(idProject);
+        return ResponseEntity.ok(projectIdDTO);
+    }
+
+    @PostMapping("/saveAndGenerate")
+    public ResponseEntity<ProjectIdDTO> saveAnGenerate(@RequestBody Project project) {
+        Project saved = projectService.save(project);
+        ProjectIdDTO projectIdDTO = new ProjectIdDTO(saved.getId());
         return ResponseEntity.ok(projectIdDTO);
     }
 }

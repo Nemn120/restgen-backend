@@ -1,5 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.application.service;
 
+import es.achavez.miw.tfm.restgen.generator.application.port.out.FileRepository;
 import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
 import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.GeneratedJavaClass;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -22,14 +24,12 @@ public class GeneratorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GeneratorService.class);
 
-    private final ProjectRepository projectRepository;
-    private final GeneratedJavaClass generatedJavaClass;
-
     @Autowired
-    public GeneratorService(ProjectRepository projectRepository, GeneratedJavaClass generatedJavaClass) {
-        this.projectRepository = projectRepository;
-        this.generatedJavaClass = generatedJavaClass;
-    }
+    private ProjectRepository projectRepository;
+    @Autowired
+    private GeneratedJavaClass generatedJavaClass;
+    @Autowired
+    private FileRepository fileRepository;
 
     public void execute(String projectId) throws IOException {
         LOG.info("EasyRestGeneratorService :: execute()");
@@ -43,9 +43,22 @@ public class GeneratorService {
         long startTime = System.currentTimeMillis();
         String uuid = UUID.randomUUID().toString();
         this.generateProject(project, uuid);
+        uploadGeneratedFiles(uuid);
+        project.setStatus(ProjectStatus.GENERATED);
+        project.setUrlRepository(uuid);
+        project.setUpdateDate(LocalDateTime.now());
+        projectRepository.save(project);
         LOG.info("GeneratorService :: generacion exitosa del proyecto");
         long finalTime = System.currentTimeMillis();
         LOG.info("GeneratorService :: Tiempo de ejecucion: " + (finalTime - startTime) + " milliseconds");
+    }
+
+    private void uploadGeneratedFiles(String uuid) {
+        LOG.info("GeneratorService :: uploadGeneratedFiles()");
+        ConfigurationPath configurationPath = new ConfigurationPath(uuid);
+        Path applicationPath = configurationPath.getApplicationPath();
+        fileRepository.upload(uuid, applicationPath);
+        LOG.info("GeneratorService :: Archivos generados y subidos correctamente");
     }
 
     private void generateProject(Project project, String uuid) throws IOException {
