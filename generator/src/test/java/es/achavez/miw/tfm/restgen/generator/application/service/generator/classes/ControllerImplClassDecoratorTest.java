@@ -32,7 +32,6 @@ class ControllerImplClassDecoratorTest {
     @Test
     void testDecorate() {
         when(javaClass.getName()).thenReturn("TestEntity");
-        when(javaClass.getPackageDirectoryMain()).thenReturn("com.example");
 
         controllerImplClassDecorator.decorate();
 

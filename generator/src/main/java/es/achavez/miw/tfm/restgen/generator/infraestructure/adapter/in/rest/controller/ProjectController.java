@@ -6,8 +6,10 @@ import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.*;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.mapper.ProjectRestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
 import java.net.URI;
@@ -81,5 +83,16 @@ public class ProjectController {
         Project saved = projectService.save(project);
         ProjectIdDTO projectIdDTO = new ProjectIdDTO(saved.getId());
         return ResponseEntity.ok(projectIdDTO);
+    }
+
+    @GetMapping(value = "/{id}/download", produces ="application/zip")
+    public ResponseEntity<StreamingResponseBody> getStreamingResponseBodyResponseEntity(
+            @PathVariable String id) throws Exception {
+        StreamingResponseBody responseBody = projectService.download(id);
+        return ResponseEntity
+                .ok()
+                .header("Content-Disposition", "attachment;filename=" + id + ".zip")
+                .contentType(MediaType.valueOf("application/zip"))
+                .body(responseBody);
     }
 }

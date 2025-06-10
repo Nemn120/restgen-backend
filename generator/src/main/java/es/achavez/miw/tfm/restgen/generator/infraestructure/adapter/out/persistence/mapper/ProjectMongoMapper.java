@@ -8,4 +8,5 @@ import org.mapstruct.Mapper;
 public interface ProjectMongoMapper {
     ProjectDocument toEntity(Project project);
     Project toDomain(ProjectDocument projectEntity);
+
 }

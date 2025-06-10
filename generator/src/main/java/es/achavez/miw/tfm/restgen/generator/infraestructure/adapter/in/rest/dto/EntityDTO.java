@@ -1,0 +1,19 @@
+package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto;
+
+import es.achavez.miw.tfm.restgen.generator.domain.Column;
+import es.achavez.miw.tfm.restgen.generator.domain.OptionsEntity;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+public class EntityDTO {
+
+    private String name;
+    private String extendsClass;
+    private String tableName;
+    private OptionsEntity options;
+    private List<Column> columns;
+}

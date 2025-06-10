@@ -4,7 +4,10 @@ import es.achavez.miw.tfm.restgen.generator.application.port.out.FileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 @Repository
 public class FileRepositoryImpl implements FileRepository {
@@ -15,5 +18,10 @@ public class FileRepositoryImpl implements FileRepository {
     @Override
     public void upload(String uuid, Path projectPath) {
         service.uploadFolder(uuid, projectPath.toFile());
+    }
+
+    @Override
+    public List<File> downloadFolder(String uuid) throws IOException {
+        return service.downloadFolder(uuid);
     }
 }

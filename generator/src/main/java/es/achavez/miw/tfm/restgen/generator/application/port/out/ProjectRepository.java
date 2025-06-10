@@ -1,5 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.application.port.out;
 
+import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
 
 import java.util.List;
@@ -14,4 +15,9 @@ public interface ProjectRepository {
     List<Project> findAll();
 
     void deleteById(String id);
+
+    JavaClass findJavaClassByProjectIdAndClassName(String id, String className);
+
+    List<JavaClass> findJavaClassByProjectId(String id);
+
 }

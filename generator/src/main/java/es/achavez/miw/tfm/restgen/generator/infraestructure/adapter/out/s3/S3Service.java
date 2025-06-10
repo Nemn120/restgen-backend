@@ -1,13 +1,15 @@
 package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class S3Service {
@@ -49,7 +51,20 @@ public class S3Service {
         }
     }
 
-    public S3Object downloadFile(String fileName) {
-        return amazonS3.getObject(bucketName, fileName);
+    public List<File> downloadFolder(String folderName) throws IOException {
+        ObjectListing objectListing = amazonS3.listObjects(bucketName, folderName);
+        List<S3ObjectSummary> objectSummaries = objectListing.getObjectSummaries();
+        List<File> downloadedFiles = new ArrayList<>();
+
+        for (S3ObjectSummary summary : objectSummaries) {
+            String key = summary.getKey();
+            File tempFile = new File(System.getProperty("java.io.tmpdir"), key);
+            tempFile.getParentFile().mkdirs();
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                amazonS3.getObject(bucketName, key).getObjectContent().transferTo(fos);
+            }
+            downloadedFiles.add(tempFile);
+        }
+        return downloadedFiles;
     }
 }

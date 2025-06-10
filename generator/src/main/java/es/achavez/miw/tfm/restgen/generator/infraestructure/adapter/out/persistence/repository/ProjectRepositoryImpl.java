@@ -1,6 +1,7 @@
 package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.repository;
 
 import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
+import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.ProjectDocument;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.mapper.ProjectMongoMapper;
@@ -46,5 +47,15 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     @Override
     public void deleteById(String id) {
         mongoProjectRepository.deleteById(id);
+    }
+
+    @Override
+    public JavaClass findJavaClassByProjectIdAndClassName(String id, String className) {
+        return mongoProjectRepository.findJavaClassByProjectIdAndClassName(id, className);
+    }
+
+    @Override
+    public List<JavaClass> findJavaClassByProjectId(String id) {
+        return mongoProjectRepository.findJavaClassByProjectId(id);
     }
 }

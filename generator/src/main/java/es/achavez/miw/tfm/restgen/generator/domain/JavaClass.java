@@ -15,7 +15,6 @@ public class JavaClass {
 
     private String name;
     private EntityClass entity;
-    private String packageDirectoryMain;
 
     public JavaClass() {
     }

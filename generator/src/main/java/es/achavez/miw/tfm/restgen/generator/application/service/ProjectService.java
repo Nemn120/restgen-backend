@@ -1,23 +1,28 @@
 package es.achavez.miw.tfm.restgen.generator.application.service;
 
+import es.achavez.miw.tfm.restgen.generator.application.port.out.FileRepository;
 import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
 import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.domain.ProjectStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class ProjectService {
 
-    private final ProjectRepository projectRepository;
-
     @Autowired
-    public ProjectService(ProjectRepository projectRepository) {
-        this.projectRepository = projectRepository;
-    }
+    private  ProjectRepository projectRepository;
+    @Autowired
+    private FileRepository fileRepository;
 
     public List<Project> findAll() {
         return projectRepository.findAll();
@@ -52,5 +57,24 @@ public class ProjectService {
         Project clonedProject = project.clone();
         Project save = this.save(clonedProject);
         return save.getId();
+    }
+
+    public StreamingResponseBody download(String id) throws IOException {
+        Project byId = this.findById(id);
+        if (byId.getStatus() != ProjectStatus.GENERATED) {
+            throw new NotFoundException("Project with id " + id + " is not generated yet.");
+        }
+        List<File> files = fileRepository.downloadFolder(byId.getUrlRepository());
+        StreamingResponseBody responseBody = outputStream -> {
+            try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
+                for (File file : files) {
+                    String relativePath = file.getPath().substring(System.getProperty("java.io.tmpdir").length() + 1); // Obtiene la ruta relativa
+                    zipOutputStream.putNextEntry(new ZipEntry(relativePath));
+                    Files.copy(file.toPath(), zipOutputStream);
+                    zipOutputStream.closeEntry();
+                }
+            }
+        };
+        return responseBody;
     }
 }
