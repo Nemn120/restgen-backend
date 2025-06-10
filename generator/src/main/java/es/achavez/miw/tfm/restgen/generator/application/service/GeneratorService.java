@@ -1,5 +1,7 @@
 package es.achavez.miw.tfm.restgen.generator.application.service;
 
+import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
+import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.GeneratedJavaClass;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.ConfigurationPath;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.GeneratedProject;
@@ -20,15 +22,24 @@ public class GeneratorService {
 
     private static final Logger LOG = LoggerFactory.getLogger(GeneratorService.class);
 
+    private final ProjectRepository projectRepository;
     private final GeneratedJavaClass generatedJavaClass;
 
     @Autowired
-    public GeneratorService(GeneratedJavaClass generatedJavaClass) {
+    public GeneratorService(ProjectRepository projectRepository, GeneratedJavaClass generatedJavaClass) {
+        this.projectRepository = projectRepository;
         this.generatedJavaClass = generatedJavaClass;
     }
 
-    public void execute(Project project) throws IOException {
+    public void execute(String projectId) throws IOException {
         LOG.info("EasyRestGeneratorService :: execute()");
+
+        Project project = projectRepository.findById(projectId).orElseThrow(() -> new NotFoundException("Project not found"));
+        if(project.getClasses() == null || project.getClasses().isEmpty()) {
+            LOG.warn("GeneratorService :: No classes found in the project, aborting generation");
+            return;
+        }
+
         long startTime = System.currentTimeMillis();
         String uuid = UUID.randomUUID().toString();
         this.generateProject(project, uuid);

@@ -28,13 +28,6 @@ class GeneratorServiceTest {
     private GeneratedJavaClass generatedJavaClass;
 
     @Test
-    void testExecute() throws IOException {
-        Project project = ObjectMapperYAML.getInstance().readObjectByPath("src/test/resources/project-02.yml", Project.class);
-
-        generatorService.execute(project);
-    }
-
-    @Test
     void testMapInMavenProperties() {
         Project project = mock(Project.class);
         ProjectProperties properties = mock(ProjectProperties.class);

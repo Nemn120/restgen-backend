@@ -2,12 +2,8 @@ package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.con
 
 import es.achavez.miw.tfm.restgen.generator.application.service.GeneratorService;
 import es.achavez.miw.tfm.restgen.generator.application.service.ProjectService;
-import es.achavez.miw.tfm.restgen.generator.application.service.generator.ObjectMapperJSON;
-import es.achavez.miw.tfm.restgen.generator.application.service.generator.ObjectMapperYAML;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
-import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.CreateProjectRequestDTO;
-import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.FindAllProjectResponseDTO;
-import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.GetProjectResponseDTO;
+import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.*;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.mapper.ProjectRestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -47,10 +43,18 @@ public class ProjectController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody CreateProjectRequestDTO projectDTO) {
+    public ResponseEntity<?> create(@RequestBody ProjectRequestDTO projectDTO) {
         Project project = projectMapper.mapCreateToDomain(projectDTO);
         Project savedProject = projectService.save(project);
         return ResponseEntity.created(URI.create(API_PROJECTS + savedProject.getId())).build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable String id, @RequestBody ProjectRequestDTO projectDTO) {
+        Project project = projectMapper.mapCreateToDomain(projectDTO);
+        project.setId(id);
+        Project savedProject = projectService.update(project);
+        return ResponseEntity.ok(savedProject);
     }
 
     @DeleteMapping("/{id}")
@@ -60,9 +64,15 @@ public class ProjectController {
     }
 
     @GetMapping("/generate")
-    public ResponseEntity<String> generate() throws IOException {
-        Project project = ObjectMapperYAML.getInstance().readObjectByPath("src/main/resources/project-02.yml", Project.class);
-        generatorService.execute(project);
-        return ResponseEntity.ok("Project service is running");
+    public ResponseEntity<String> generate(@RequestBody ProjectIdDTO generate) throws IOException {
+        generatorService.execute(generate.id());
+        return ResponseEntity.ok("Project generated");
+    }
+
+    @GetMapping("/clone")
+    public ResponseEntity<ProjectIdDTO> clone(@RequestBody ProjectIdDTO id) {
+        String idProject = projectService.cloneProject(id.id());
+        ProjectIdDTO projectIdDTO = new ProjectIdDTO(idProject);
+        return ResponseEntity.ok(projectIdDTO);
     }
 }

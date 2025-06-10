@@ -9,6 +9,4 @@ public class SecurityProperties {
 
     private String enabled;
     private String secretKey;
-
-
 }
