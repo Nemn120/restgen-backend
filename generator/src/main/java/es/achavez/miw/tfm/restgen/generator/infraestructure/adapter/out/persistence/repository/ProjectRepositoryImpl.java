@@ -1,6 +1,7 @@
 package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.repository;
 
 import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
+import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.ProjectDocument;
@@ -51,11 +52,19 @@ public class ProjectRepositoryImpl implements ProjectRepository {
 
     @Override
     public JavaClass findJavaClassByProjectIdAndClassName(String id, String className) {
-        return mongoProjectRepository.findJavaClassByProjectIdAndClassName(id, className);
+        ProjectDocument projectDocument = mongoProjectRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Project not found with id: " + id));
+
+        return projectDocument.getClasses().stream()
+                .filter(javaClass -> className.equals(javaClass.getName()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("JavaClass not found with name: " + className));
     }
 
     @Override
     public List<JavaClass> findJavaClassByProjectId(String id) {
-        return mongoProjectRepository.findJavaClassByProjectId(id);
+        Project projectDocument = this.findById(id)
+                .orElseThrow(()-> new NotFoundException("Project not found with id: " + id));
+        return projectDocument != null ? projectDocument.getClasses() : null;
     }
 }

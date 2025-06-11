@@ -26,6 +26,8 @@ public interface ProjectRestMapper {
     @Mapping(target = "properties.documentation", source = "properties.documentation")
     Project mapCreateToDomain(ProjectRequestDTO projectDTO);
 
+    @Mapping(target = "basePath", source = "properties.application.basePath")
+    @Mapping(target = "port", source = "properties.application.port")
     FindAllProjectResponseDTO mapToFindProjectResponse(Project project);
 
     List<FindAllProjectResponseDTO> mapToFindProjectResponse(List<Project> projects);

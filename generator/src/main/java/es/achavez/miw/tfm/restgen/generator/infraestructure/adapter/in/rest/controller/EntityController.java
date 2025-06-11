@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
-@RequestMapping
-@RestController(EntityController.API_ENTITIES)
+@RestController
+@RequestMapping(EntityController.API_ENTITIES)
 public class EntityController {
 
     public static final String API_ENTITIES = "/api/entities";

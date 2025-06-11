@@ -21,4 +21,7 @@ public class FindAllProjectResponseDTO {
     private LocalDateTime updateDate;
     private String creationUser;
     private String updateUser;
+
+    private String basePath;
+    private String port;
 }
