@@ -55,7 +55,7 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
 
     private void addExtendsAuditableEntity() {
         EntityClass entityClass = javaClass.getEntity();
-        if (entityClass.getExtendsClass() == null || AUDITABLE_ENTITY.name().equals(entityClass.getExtendsClass())) {
+        if (StringUtils.isBlank(entityClass.getExtendsClass()) || AUDITABLE_ENTITY.name().equals(entityClass.getExtendsClass())) {
             addExtendsWithoutPackage(AUDITABLE_ENTITY);
             logger.info("addExtendsAuditableEntity(): Generando extension de " + ABSTRACT_ID_ENTITY.getAnnotationName());
         }else {
@@ -109,7 +109,7 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
     }
 
     private void addDiscriminatorValue(Discriminator discriminator) {
-        if (discriminator.getValue() != null) {
+        if (StringUtils.isNotBlank(discriminator.getValue())) {
             AnnotationSource<JavaClassSource> addAnnotation = addAnnotationAndImport(DISCRIMINATOR_VALUE);
             addAnnotation.setStringValue(discriminator.getValue());
         }
@@ -117,10 +117,10 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
 
     private void addDiscriminatorColumnAnnotation(Discriminator discriminator) {
         DiscriminatorColumn column = discriminator.getColumn();
-        if(column != null){
+        if(column != null && StringUtils.isNotBlank(column.getName())) {
             AnnotationSource<JavaClassSource> addAnnotation = addAnnotationAndImport(DISCRIMINATOR_COLUMN);
 
-            if (column.getName() != null) {
+            if (StringUtils.isNotBlank(column.getName())) {
                 addAnnotation.setStringValue("name", column.getName());
             }
             if (column.getType() != null) {

@@ -3,6 +3,7 @@ package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.con
 import es.achavez.miw.tfm.restgen.generator.application.service.EntityService;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.EntityDTO;
+import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.FindAllEntityDTO;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.mapper.EntityRestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,10 @@ public class EntityController {
     private EntityRestMapper entityMapper;
 
     @GetMapping("/project/{id}")
-    public ResponseEntity<List<EntityDTO>> findByEntityId(
+    public ResponseEntity<List<FindAllEntityDTO>> findByEntityId(
             @PathVariable String id) {
         List<JavaClass> entities = entityService.findByProjectId(id);
-        List<EntityDTO> EntityDTO = entityMapper.mapToDTO(entities);
+        List<FindAllEntityDTO> EntityDTO = entityMapper.mapToFindAllDTO(entities);
         return ResponseEntity.ok(EntityDTO);
     }
 
@@ -40,16 +41,9 @@ public class EntityController {
     @PostMapping("/project/{projectId}")
     public ResponseEntity<?> create(@PathVariable String projectId, @RequestBody EntityDTO EntityDTO) {
         JavaClass javaClass = entityMapper.mapToDomain(EntityDTO);
-        JavaClass savedEntity = entityService.save(projectId, javaClass);
+        JavaClass savedEntity = entityService.saveOrUpdate(projectId, javaClass);
         return ResponseEntity.created(URI.create(API_ENTITIES + projectId + "/class/" + savedEntity.getName()))
                 .build();
-    }
-
-    @PutMapping("/project/{projectId}")
-    public ResponseEntity<?> update(@PathVariable String projectId, @RequestBody EntityDTO EntityDTO) {
-        JavaClass javaClass = entityMapper.mapToDomain(EntityDTO);
-        JavaClass savedEntity = entityService.update(projectId, javaClass);
-        return ResponseEntity.ok(savedEntity);
     }
 
     @DeleteMapping("/project/{projectId}/class/{className}")

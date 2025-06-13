@@ -14,16 +14,6 @@ public interface ProjectRestMapper {
 
     GetProjectResponseDTO mapToGetProjectResponse(Project project);
 
-    @Mapping(target = "properties.application.port", source = "properties.port")
-    @Mapping(target = "properties.application.basePath", source = "properties.basePath")
-    @Mapping(target = "properties.maven.groupId", source = "properties.groupId")
-    @Mapping(target = "properties.maven.artifactId", source = "properties.artifactId")
-    @Mapping(target = "properties.maven.version", source = "properties.mavenVersion")
-    @Mapping(target = "properties.maven.name", source = "properties.mavenName")
-    @Mapping(target = "properties.maven.description", source = "properties.mavenDescription")
-    @Mapping(target = "properties.security.secretKey", source = "properties.secretKey")
-    @Mapping(target = "properties.database.type", source = "properties.databaseType")
-    @Mapping(target = "properties.documentation", source = "properties.documentation")
     Project mapCreateToDomain(ProjectRequestDTO projectDTO);
 
     @Mapping(target = "basePath", source = "properties.application.basePath")

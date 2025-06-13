@@ -6,6 +6,8 @@ import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,35 +27,25 @@ public class EntityService {
     public List<JavaClass> findByProjectId(String id) {
         return projectRepository.findJavaClassByProjectId(id);
     }
-
-    public JavaClass save(String projectId, JavaClass javaClass) {
+    public JavaClass saveOrUpdate(String projectId, JavaClass javaClass) {
         return projectRepository.findById(projectId).map(project -> {
-            boolean exists = project.getClasses().stream()
-                    .anyMatch(existingClass -> existingClass.getName().equals(javaClass.getName()));
-            if (exists) {
-                throw new IllegalArgumentException("Duplicate JavaClass name: " + javaClass.getName());
-            }
-            project.getClasses().add(javaClass);
-            projectRepository.save(project);
-            return javaClass;
-        }).orElseThrow(() -> new NotFoundException("Project not found with ID: " + projectId));
-    }
-
-    public JavaClass update(String projectId, JavaClass javaClass) {
-        return projectRepository.findById(projectId).map(project -> {
-            List<JavaClass> updatedClasses = project.getClasses().stream()
+            List<JavaClass> updatedClasses = new ArrayList<>(project.getClasses().stream()
                     .map(existingClass -> {
                         if (existingClass.getName().equals(javaClass.getName())) {
                             return javaClass;
                         }
                         return existingClass;
-                    }).toList();
-            boolean updated = updatedClasses.stream()
+                    }).toList());
+
+            boolean exists = updatedClasses.stream()
                     .anyMatch(updatedClass -> updatedClass.getName().equals(javaClass.getName()));
-            if (!updated) {
-                throw new NotFoundException("JavaClass not found: " + javaClass.getName());
+
+            if (!exists) {
+                updatedClasses.add(javaClass);
             }
+
             project.setClasses(updatedClasses);
+            project.setUpdateDate(LocalDateTime.now());
             projectRepository.save(project);
             return javaClass;
         }).orElseThrow(() -> new NotFoundException("Project not found with ID: " + projectId));

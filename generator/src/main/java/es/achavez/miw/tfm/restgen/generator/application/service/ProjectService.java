@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -35,6 +36,7 @@ public class ProjectService {
 
     public Project save(Project project) {
         project.setStatus(ProjectStatus.CREATED);
+        project.setCreationDate(LocalDateTime.now());
         return projectRepository.save(project);
     }
 
@@ -45,7 +47,8 @@ public class ProjectService {
         byId.setDescription(project.getDescription());
         byId.setUrlRepository(project.getUrlRepository());
         byId.setIsPrivate(project.getIsPrivate());
-        return projectRepository.save(project);
+        byId.setUpdateDate(LocalDateTime.now());
+        return projectRepository.save(byId);
     }
 
     public void deleteById(String id) {
