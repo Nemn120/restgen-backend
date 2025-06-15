@@ -71,7 +71,7 @@ public final class GeneratorUtil {
         return convertUpperCaseFirstLetters(snakeCaseToCamelCase(str));
     }
 
-    public static String convertUpperCaseFirstLetters(String str) {
+    private static String convertUpperCaseFirstLetters(String str) {
         if (str == null) {
             return null;
         }

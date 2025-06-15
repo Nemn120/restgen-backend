@@ -20,4 +20,6 @@ public interface ProjectRepository {
 
     List<JavaClass> findJavaClassByProjectId(String id);
 
+    Project findDiagramPlantUmlById(String id);
+
 }

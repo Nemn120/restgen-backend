@@ -95,4 +95,14 @@ public class ProjectController {
                 .contentType(MediaType.valueOf("application/zip"))
                 .body(responseBody);
     }
+
+    @GetMapping("/{id}/diagram")
+    public ResponseEntity<GetDiagramDTO> getPlantUmlDiagram(@PathVariable String id) {
+        Project project = projectService.findDiagramPlantUmlById(id);
+        if (project == null || project.getPlantUmlDiagram() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        GetDiagramDTO diagramDTO = new GetDiagramDTO(project.getPlantUmlDiagram());
+        return ResponseEntity.ok(diagramDTO);
+    }
 }

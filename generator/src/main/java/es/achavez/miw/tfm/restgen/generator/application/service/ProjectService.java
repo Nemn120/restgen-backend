@@ -80,4 +80,8 @@ public class ProjectService {
         };
         return responseBody;
     }
+
+    public Project findDiagramPlantUmlById(String id) {
+        return projectRepository.findDiagramPlantUmlById(id);
+    }
 }

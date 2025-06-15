@@ -15,7 +15,6 @@ public class FindAllProjectResponseDTO {
     private String description;
     private ProjectStatus status;
     private String urlRepository;
-    private String plantUmlDiagram;
     private Boolean isPrivate;
     private LocalDateTime creationDate;
     private LocalDateTime updateDate;

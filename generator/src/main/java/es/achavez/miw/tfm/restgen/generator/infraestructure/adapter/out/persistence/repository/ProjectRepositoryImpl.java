@@ -67,4 +67,13 @@ public class ProjectRepositoryImpl implements ProjectRepository {
                 .orElseThrow(()-> new NotFoundException("Project not found with id: " + id));
         return projectDocument != null ? projectDocument.getClasses() : null;
     }
+
+    @Override
+    public Project findDiagramPlantUmlById(String id) {
+        ProjectDocument plantUmlDiagramById = this.mongoProjectRepository.findPlantUmlDiagramById(id);
+        if (plantUmlDiagramById != null) {
+            return projectMapper.toDomain(plantUmlDiagramById);
+        }
+        return null;
+    }
 }

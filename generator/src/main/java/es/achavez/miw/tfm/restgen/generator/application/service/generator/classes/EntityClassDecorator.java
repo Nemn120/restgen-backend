@@ -3,6 +3,7 @@ package es.achavez.miw.tfm.restgen.generator.application.service.generator.class
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.GeneratorUtil;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.MavenProjectPath;
 import es.achavez.miw.tfm.restgen.generator.domain.*;
+import jakarta.persistence.FetchType;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
@@ -202,7 +203,12 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
         Validate.notNull(relation, "Relation cannot be null");
 
         fieldSource.setType(column.getProperty().getType());
-        addManyToOneRelation(fieldSource, relation);
+
+        switch (relation.getType()) {
+            case MANY_TO_ONE -> addManyToOneRelation(fieldSource, relation);
+            case ONE_TO_ONE -> addOneToOneRelation(fieldSource, relation);
+            default -> throw new IllegalArgumentException("Unsupported relation type: " + relation.getType());
+        }
         addJoinColumnAnnotation(fieldSource, column);
     }
 
@@ -210,7 +216,18 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
         AnnotationSource<JavaClassSource> annotationRelation = fieldSource.addAnnotation(relation.getType().getName());
         javaClassSource.addImport(relation.getType().getPackageImport());
 
-        if (relation.getFetch() != null) {
+        addFetchTypeLazy(relation, annotationRelation);
+    }
+
+    private void addOneToOneRelation(FieldSource<JavaClassSource> fieldSource, RelationColumn relation) {
+        AnnotationSource<JavaClassSource> annotationRelation = fieldSource.addAnnotation(relation.getType().getName());
+        javaClassSource.addImport(relation.getType().getPackageImport());
+
+        addFetchTypeLazy(relation, annotationRelation);
+    }
+
+    private void addFetchTypeLazy(RelationColumn relation, AnnotationSource<JavaClassSource> annotationRelation) {
+        if (FetchType.LAZY.equals(relation.getFetch())) {
             annotationRelation.setEnumValue("fetch", relation.getFetch());
         }
     }
@@ -254,7 +271,7 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
     }
 
     private void setColumnUnique(AnnotationSource<JavaClassSource> annotation, ColumnDefinition columnDefinition) {
-        if (columnDefinition.getUnique() != null) {
+        if (Boolean.TRUE.equals(columnDefinition.getUnique())) {
             annotation.setLiteralValue("unique", String.valueOf(columnDefinition.getUnique()));
         }
     }
@@ -289,9 +306,7 @@ public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAb
     }
 
     private void setJoinColumnNullable(AnnotationSource<JavaClassSource> joinColumnAnnotation, ColumnDefinition columnDefinition) {
-        if (Boolean.TRUE.equals(columnDefinition.getNullable())) {
-            joinColumnAnnotation.setLiteralValue(NULLABLE, String.valueOf(Boolean.TRUE));
-        } else {
+        if (Boolean.FALSE.equals(columnDefinition.getNullable())) {
             joinColumnAnnotation.setLiteralValue(NULLABLE, String.valueOf(Boolean.FALSE));
         }
     }

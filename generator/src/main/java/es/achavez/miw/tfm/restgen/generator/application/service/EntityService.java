@@ -2,6 +2,7 @@ package es.achavez.miw.tfm.restgen.generator.application.service;
 
 import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
 import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
+import es.achavez.miw.tfm.restgen.generator.application.service.generator.PlantUmlDiagramGenerator;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,9 @@ public class EntityService {
 
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private PlantUmlDiagramGenerator plantUmlDiagramGenerator;
 
-    public EntityService(ProjectRepository projectRepository) {
-        this.projectRepository = projectRepository;
-    }
 
     public JavaClass findByProjectIdAndClassName(String id, String className) {
         return projectRepository.findJavaClassByProjectIdAndClassName(id, className);
@@ -43,8 +43,8 @@ public class EntityService {
             if (!exists) {
                 updatedClasses.add(javaClass);
             }
-
             project.setClasses(updatedClasses);
+            project.setPlantUmlDiagram(plantUmlDiagramGenerator.generateDiagram(updatedClasses));
             project.setUpdateDate(LocalDateTime.now());
             projectRepository.save(project);
             return javaClass;
@@ -58,6 +58,8 @@ public class EntityService {
                     .filter(javaClass -> !javaClass.getName().equals(className))
                     .toList();
             project.setClasses(javaClasses);
+            project.setPlantUmlDiagram(plantUmlDiagramGenerator.generateDiagram(javaClasses));
+            project.setUpdateDate(LocalDateTime.now());
             projectRepository.save(project);
         });
     }
