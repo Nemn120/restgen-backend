@@ -11,7 +11,6 @@ import java.util.List;
 @NoArgsConstructor
 public class EntityClass {
 
-
     private String extendsClass;
     private String tableName;
     private OptionsEntity options;

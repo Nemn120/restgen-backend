@@ -9,7 +9,8 @@ public enum DirectoryLayerPath {
     REPOSITORY(".repository", "Repository"),
     ENTITY(".entity", ""),
     DTO(".dto", "DTO"),
-    MAPPER(".mapper", "Mapper");
+    MAPPER(".mapper", "Mapper"),
+    CONFIG(".config", "Config");
 
     String subPath;
     String className;

@@ -9,5 +9,6 @@ import lombok.Setter;
 public class EntityDTO {
 
     private String name;
+    private String apiName;
     private EntityClass entity;
 }

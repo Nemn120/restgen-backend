@@ -27,6 +27,7 @@ public class EntityService {
     public List<JavaClass> findByProjectId(String id) {
         return projectRepository.findJavaClassByProjectId(id);
     }
+
     public JavaClass saveOrUpdate(String projectId, JavaClass javaClass) {
         return projectRepository.findById(projectId).map(project -> {
             List<JavaClass> updatedClasses = new ArrayList<>(project.getClasses().stream()

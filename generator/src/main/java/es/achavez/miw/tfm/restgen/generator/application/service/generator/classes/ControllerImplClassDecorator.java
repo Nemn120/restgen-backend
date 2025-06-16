@@ -27,7 +27,7 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         getJavaClassSource().setName(controllerImplName);
         getJavaClassSource().addInterface(controllerName);
         addAnnotationAndImport(AnnotationPersistence.REST_CONTROLLER);
-        addAnnotationAndImport(AnnotationPersistence.REQUEST_MAPPING).setStringValue("value", "/" + javaClass.getName().toLowerCase());
+        addAnnotationAndImport(AnnotationPersistence.REQUEST_MAPPING).setStringValue("value", "/" + javaClass.getApiName().toLowerCase());
 
         addImport(DirectoryLayerPath.CONTROLLER);
         addSubPackageImport(RESPONSE_CUSTOM_PAGE);

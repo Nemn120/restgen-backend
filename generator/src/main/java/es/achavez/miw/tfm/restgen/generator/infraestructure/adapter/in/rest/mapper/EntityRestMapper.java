@@ -11,7 +11,6 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface EntityRestMapper {
 
-    @Mapping(target = "extendsClass", source = "entity.extendsClass")
     @Mapping(target = "tableName", source = "entity.tableName")
     FindAllEntityDTO mapToFindAllDTO(JavaClass javaClass);
 

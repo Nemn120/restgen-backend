@@ -128,4 +128,8 @@ public class MavenProjectPath {
         return concatGroupIdPath(javaMainPath);
     }
 
+    public Path getConfigMainPath() {
+        return concatSubPackagePath(concatGroupIdPath(javaMainPath), "config");
+    }
+
 }

@@ -17,23 +17,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 public class GeneratedJavaClass {
 
     private static Logger logger = LogManager.getLogger(GeneratedJavaClass.class);
 
-    public void generate(List<JavaClass> javaClasses, MavenProjectPath mavenProjectPath) {
+    public void generate(Project project, MavenProjectPath mavenProjectPath) {
         List<DocketField> docketFields = new ArrayList<>();
 
         List<JavaClass> genericJavaClasses = new ArrayList<>();
-        for (JavaClass javaClass : javaClasses) {
+        for (JavaClass javaClass : project.getClasses()) {
             JavaClass javaClassGenerate = generateJavaFiles(javaClass, mavenProjectPath);
             if (javaClassGenerate != null) {
                 DocketField docketField = DocketField.builder()
-                        .apiName(javaClassGenerate.getName())
+                        .apiName(javaClassGenerate.getApiName())
                         .name(GeneratorUtil.convertCamelToSnakeCaseLower(javaClassGenerate.getName()))
                         .camelCaseName(GeneratorUtil.convertUpperFisrtLettersAndCamelCase(javaClassGenerate.getName()))
                         .build();
@@ -42,6 +40,30 @@ public class GeneratedJavaClass {
             }
         }
         generateDTOAndMapperFile(genericJavaClasses, mavenProjectPath);
+        SwaggerJavaClass documentationSwagger = getSwaggerDocumentationJavaClass(project.getProperties(), docketFields);
+        generateSwaggerConfig(documentationSwagger, mavenProjectPath);
+    }
+
+    private SwaggerJavaClass getSwaggerDocumentationJavaClass(ProjectProperties properties, List<DocketField> docketFields) {
+        DocumentationProperties documentation = properties.getDocumentation();
+        if (documentation == null) {
+            logger.warn("No documentation properties found, returning empty SwaggerJavaClass");
+            return new SwaggerJavaClass();
+        }
+        SwaggerJavaClass documentationSwagger = new SwaggerJavaClass();
+        documentationSwagger.setDescription(documentation.getDescription());
+        documentationSwagger.setTitle(documentation.getTitle());
+        documentationSwagger.setVersion(documentation.getVersion());
+        documentationSwagger.setApiName(properties.getApplication().getBasePath());
+        documentationSwagger.setClassName(documentation.getClassName());
+        documentationSwagger.setEmailContact(documentation.getContactEmail());
+        documentationSwagger.setLicense(documentation.getLicenseName());
+        documentationSwagger.setLicenseUrl(documentation.getLicenseUrl());
+        documentationSwagger.setTermsOfServiceUrl(documentation.getTermsOfServiceUrl());
+        documentationSwagger.setDocketFields(docketFields);
+
+        //TODO por revisar si falta agregar mas
+        return documentationSwagger;
     }
 
     private JavaClass generateJavaFiles(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
@@ -92,15 +114,15 @@ public class GeneratedJavaClass {
         mapperDecorator.decorate();
         generateFile(mapperDecorator.getJavaClassSource(), mavenProjectPath.getMapperMainPath());
     }
-/*
 
-    private void generateSwaggerConfigFile(SwaggerJavaClass docProperties, MavenProjectPath mavenProjectPath) {
+    private void generateSwaggerConfig(SwaggerJavaClass docProperties, MavenProjectPath mavenProjectPath) {
         if (docProperties != null) {
-            GeneratedJavaFile generatedJavaFile = new GeneratedJavaFile(mavenProjectPath);
-            generatedJavaFile.createSwaggerConfigFile(docProperties);
+            final JavaClassSource swaggerClass = Roaster.create(JavaClassSource.class);
+            SwaggerDecorator swaggerDecorator = new SwaggerDecorator(swaggerClass, docProperties, mavenProjectPath);
+            swaggerDecorator.decorate();
+            generateFile(swaggerDecorator.getJavaClassSource(), mavenProjectPath.getConfigMainPath());
         }
     }
-*/
 
 
     private void generateRepository(JavaClass javaClass, MavenProjectPath mavenProjectPath) {

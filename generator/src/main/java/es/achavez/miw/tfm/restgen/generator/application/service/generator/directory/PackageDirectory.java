@@ -4,6 +4,7 @@ import es.achavez.miw.tfm.restgen.generator.application.service.generator.Genera
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.MavenProjectPath;
 import es.achavez.miw.tfm.restgen.generator.domain.DirectoryLayerPath;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
+import es.achavez.miw.tfm.restgen.generator.domain.SwaggerJavaClass;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,15 +12,20 @@ import java.util.Map;
 
 public class PackageDirectory {
 
-    private String javaClassName;
-    private MavenProjectPath packageName;
+    private final String javaClassName;
+    private final MavenProjectPath packageName;
 
     private Map<DirectoryLayerPath, PackageDirectoryLayer> layersPath;
 
     public PackageDirectory(JavaClass JavaClass, MavenProjectPath mavenProjectPath) {
         this.packageName = mavenProjectPath;
-        String camelCaseName = GeneratorUtil.snakeCaseToUpperCamelCase(JavaClass.getName());
-        this.javaClassName = camelCaseName;
+        this.javaClassName = GeneratorUtil.snakeCaseToUpperCamelCase(JavaClass.getName());
+        this.layersPath = initializeLayers();
+    }
+
+    public PackageDirectory(SwaggerJavaClass JavaClass, MavenProjectPath mavenProjectPath) {
+        this.packageName = mavenProjectPath;
+        this.javaClassName = JavaClass.getClassName();
         this.layersPath = initializeLayers();
     }
 
@@ -33,6 +39,7 @@ public class PackageDirectory {
         addLayerPath(DirectoryLayerPath.CONTROLLER_IMPL);
         addLayerPath(DirectoryLayerPath.DTO);
         addLayerPath(DirectoryLayerPath.MAPPER);
+        addLayerPath(DirectoryLayerPath.CONFIG);
         return layersPath;
     }
 

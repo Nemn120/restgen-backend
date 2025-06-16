@@ -65,7 +65,17 @@ public enum AnnotationPersistence {
     MAPPER("Mapper","org.mapstruct.Mapper" ),
     MAPPER_MAPPING("Mapping","org.mapstruct.Mapping" ),
     MAPPER_MAPPINGS("Mappings","org.mapstruct.Mappings"),
-    AUDITABLE_DTO("AuditableDTO",".dto.AuditableDTO");
+    AUDITABLE_DTO("AuditableDTO",".dto.AuditableDTO"),
+
+    CONFIGURATION("Configuration", "org.springframework.context.annotation.Configuration"),
+    SECURITY_SCHEME("SecurityScheme", "io.swagger.v3.oas.annotations.security.SecurityScheme"),
+    SECURITY_SCHEME_TYPE("SecuritySchemeType", "io.swagger.v3.oas.annotations.enums.SecuritySchemeType"),
+    SECURITY_SCHEME_IN("SecuritySchemeIn", "io.swagger.v3.oas.annotations.enums.SecuritySchemeIn"),
+    OPEN_API("OpenAPI", "io.swagger.v3.oas.models.OpenAPI"),
+    OPEN_API_INFO("Info", "io.swagger.v3.oas.annotations.info.Info"),
+    OPEN_API_GROUPED("GroupedOpenApi", "org.springdoc.core.models.GroupedOpenApi");
+
+
 
     private final String annotationName;
     private final String packageName;

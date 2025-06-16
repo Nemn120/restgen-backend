@@ -14,6 +14,7 @@ import org.apache.commons.lang3.Validate;
 public class JavaClass {
 
     private String name;
+    private String apiName;
     private EntityClass entity;
 
     public JavaClass() {

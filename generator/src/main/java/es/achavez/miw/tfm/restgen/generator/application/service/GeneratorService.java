@@ -67,9 +67,7 @@ public class GeneratorService {
         GeneratedProject generatedProject = new GeneratedProject(mavenProjectPath);
         generatedProject.createProjectFromArchetype(configurationPath.getApplicationPath());
 
-        generatedJavaClass.generate(project.getClasses(), mavenProjectPath);
-        //DocumentationProperties documentationSwagger = getSwaggerDocumentationJavaClass(openApiSpecificationValid, docketFields);
-        //generateSwaggerConfigFile(documentationSwagger, mavenProjectPath);
+        generatedJavaClass.generate(project, mavenProjectPath);
     }
 
     private MavenProjectPath createMavenProjectPath(Project project, ConfigurationPath configurationPath) {

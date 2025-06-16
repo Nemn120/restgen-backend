@@ -9,7 +9,7 @@ import java.util.List;
 @Component
 public class PlantUmlDiagramGenerator {
 
-    private final StringBuilder plantUml;
+    private StringBuilder plantUml;
 
     public PlantUmlDiagramGenerator() {
         this.plantUml = new StringBuilder("!theme cerulean\n\n");
@@ -29,7 +29,9 @@ public class PlantUmlDiagramGenerator {
             plantUml.append(generateRelations(entity));
         }
 
-        return plantUml.toString();
+        String plantUmlString = plantUml.toString();
+        this.plantUml =new StringBuilder("!theme cerulean\n\n");
+        return plantUmlString;
     }
 
     private String generateClassDiagram(JavaClass entity) {
@@ -47,19 +49,24 @@ public class PlantUmlDiagramGenerator {
     }
 
     private String generateFieldDiagram(Column field) {
-        DataTypes dataTypes = DataTypes.valueOf(field.getProperty().getType());
-        return field.getProperty().getName() + " : " + dataTypes.getName();
+        if(Boolean.TRUE.equals(field.getColumn().getForeignkey())){
+            return field.getProperty().getName() + " : " + field.getProperty().getType();
+        }else{
+            DataTypes dataTypes = DataTypes.valueOf(field.getProperty().getType());
+            return field.getProperty().getName() + " : " + dataTypes.getName();
+        }
     }
 
     private String generateRelations(JavaClass entity) {
         StringBuilder relations = new StringBuilder();
         for (Column field : entity.getEntity().getColumns()) {
             RelationColumn relation = field.getRelation();
-            if (relation != null && isValidRelationType(relation)) {
-                switch (relation.getType().getName()) {
-                    case "ONE_TO_ONE" -> relations.append(entity.getName())
+            if (Boolean.TRUE.equals(field.getColumn().getForeignkey()) &&
+                relation != null && isValidRelationType(relation)) {
+                switch (relation.getType()) {
+                    case Relation.ONE_TO_ONE -> relations.append(entity.getName())
                             .append(" -down-> ").append(field.getProperty().getType()).append("\n");
-                    case "MANY_TO_ONE" -> relations.append(entity.getName())
+                    case Relation.MANY_TO_ONE -> relations.append(entity.getName())
                             .append(" -down-> \"0..*\" ").append(field.getProperty().getType()).append("\n");
                 }
             }
