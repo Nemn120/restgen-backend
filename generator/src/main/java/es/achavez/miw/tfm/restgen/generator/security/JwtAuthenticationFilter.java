@@ -7,6 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,6 +21,8 @@ import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     private static final String AUTHORIZATION = "Authorization";
 
     @Autowired
@@ -27,12 +31,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
             throws IOException, ServletException {
-        String token = jwtService.extractToken(request.getHeader(AUTHORIZATION));
-        if (!token.isEmpty()) {
-            GrantedAuthority authority = new SimpleGrantedAuthority(Role.PREFIX + jwtService.role(token));
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(jwtService.user(token), token, List.of(authority));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String method = request.getMethod();
+        String requestUrl = request.getRequestURL().toString();
+        String authorizationHeader = request.getHeader(AUTHORIZATION);
+
+        logger.info("Solicitud recibida: Método={}, URL={}", method, requestUrl);
+        if (authorizationHeader != null) {
+            logger.info("Encabezado Authorization: {}", authorizationHeader);
+        } else {
+            logger.info("Encabezado Authorization no presente.");
+        }
+
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = jwtService.extractToken(request.getHeader(AUTHORIZATION));
+            if (!token.isEmpty()) {
+                GrantedAuthority authority = new SimpleGrantedAuthority(Role.PREFIX + jwtService.role(token));
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(jwtService.user(token), null, List.of(authority));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
         chain.doFilter(request, response);
     }

@@ -39,4 +39,9 @@ public class UserController {
     public UserDto readUser(@PathVariable String email) {
         return new UserDto(this.service.findByEmailAssured(email));
     }
+
+    @GetMapping("/token/github/{code}/state/{state}")
+    public UserDto getUserGithub(@PathVariable String code, @PathVariable String state) {
+        return service.getUserGithub(code, state);
+    }
 }
