@@ -1,5 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.application.service;
 
+import es.achavez.miw.tfm.restgen.generator.application.port.in.EntityUsesCases;
 import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
 import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.PlantUmlDiagramGenerator;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class EntityService {
+public class EntityService implements EntityUsesCases {
 
     @Autowired
     private ProjectRepository projectRepository;
@@ -20,14 +21,17 @@ public class EntityService {
     private PlantUmlDiagramGenerator plantUmlDiagramGenerator;
 
 
+    @Override
     public JavaClass findByProjectIdAndClassName(String id, String className) {
         return projectRepository.findJavaClassByProjectIdAndClassName(id, className);
     }
 
+    @Override
     public List<JavaClass> findByProjectId(String id) {
         return projectRepository.findJavaClassByProjectId(id);
     }
 
+    @Override
     public JavaClass saveOrUpdate(String projectId, JavaClass javaClass) {
         return projectRepository.findById(projectId).map(project -> {
             List<JavaClass> updatedClasses = new ArrayList<>(project.getClasses().stream()
@@ -52,6 +56,7 @@ public class EntityService {
         }).orElseThrow(() -> new NotFoundException("Project not found with ID: " + projectId));
     }
 
+    @Override
     public void delete(String projectId, String className) {
         this.projectRepository.findById(projectId).ifPresent(project -> {
             List<JavaClass> javaClasses = project.getClasses()

@@ -21,12 +21,12 @@ class ControllerImplClassDecoratorTest {
     @Mock
     private MavenProjectPath mavenProjectPath;
 
-    private ControllerImplClassDecorator<JavaClassSource> controllerImplClassDecorator;
+    private ControllerImplClassGenerator<JavaClassSource> controllerImplClassDecorator;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        controllerImplClassDecorator = new ControllerImplClassDecorator<>(javaClassSource, javaClass, mavenProjectPath);
+        controllerImplClassDecorator = new ControllerImplClassGenerator<>(javaClassSource, javaClass, mavenProjectPath);
     }
 
     @Test

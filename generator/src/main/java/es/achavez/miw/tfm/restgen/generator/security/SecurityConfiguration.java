@@ -1,6 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.security;
 
-import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.UserInfo;
+import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.UserInfoDocument;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.repository.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +38,7 @@ public class SecurityConfiguration {
     @Bean
     public UserDetailsService userDetailsService() {
         return email -> {
-            UserInfo user = userRepository.findByEmail(email)
+            UserInfoDocument user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
             return org.springframework.security.core.userdetails.User.builder()
                     .username(user.getEmail())

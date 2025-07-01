@@ -22,7 +22,7 @@ class EntityClassDecoratorTest {
     @Mock
     private EntityClass entityClass;
 
-    private EntityClassDecorator<JavaClassSource> entityClassDecorator;
+    private EntityClassGenerator<JavaClassSource> entityClassDecorator;
 
     @Mock
     private MavenProjectPath mavenProjectPath;
@@ -31,7 +31,7 @@ class EntityClassDecoratorTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(javaClass.getEntity()).thenReturn(entityClass);
-        entityClassDecorator = new EntityClassDecorator<>(javaClassSource, javaClass, mavenProjectPath);
+        entityClassDecorator = new EntityClassGenerator<>(javaClassSource, javaClass, mavenProjectPath);
     }
 
     @Test

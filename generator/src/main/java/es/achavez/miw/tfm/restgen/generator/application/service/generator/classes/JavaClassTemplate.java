@@ -12,9 +12,9 @@ import org.apache.logging.log4j.Logger;
 import org.jboss.forge.roaster.model.source.AnnotationSource;
 import org.jboss.forge.roaster.model.source.JavaSource;
 
-public abstract class JavaClassAbstractDecorator<T extends JavaSource> implements JavaClassDecorator<T>{
+public abstract class JavaClassTemplate<T extends JavaSource> implements JavaClassProcessor<T> {
 
-    private static Logger logger = LogManager.getLogger(JavaClassAbstractDecorator.class);
+    private static Logger logger = LogManager.getLogger(JavaClassTemplate.class);
 
     protected T javaClassSource;
 
@@ -31,7 +31,7 @@ public abstract class JavaClassAbstractDecorator<T extends JavaSource> implement
         addPackageClass();
     }
 
-    public JavaClassAbstractDecorator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+    public JavaClassTemplate(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         this.javaClassSource = javaClassSource;
         this.javaClass = javaClass;
         this.mavenProjectPath = mavenProjectPath;

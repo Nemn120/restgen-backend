@@ -18,15 +18,15 @@ import java.util.List;
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
 
 
-public class EntityClassDecorator<T extends JavaClassSource> extends JavaClassAbstractDecorator<T> {
+public class EntityClassGenerator<T extends JavaClassSource> extends JavaClassTemplate<T> {
 
     public static final String NULLABLE = "nullable";
     public static final String REFERENCED_COLUMN_NAME = "referencedColumnName";
-    private static Logger logger = LogManager.getLogger(EntityClassDecorator.class);
+    private static Logger logger = LogManager.getLogger(EntityClassGenerator.class);
     private EntityClass entityClass;
     private OptionsEntity options;
 
-    public EntityClassDecorator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+    public EntityClassGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         super(javaClassSource, javaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.ENTITY;
     }

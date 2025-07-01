@@ -2,7 +2,7 @@ package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.Role;
-import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.UserInfo;
+import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.UserInfoDocument;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,10 +33,11 @@ public class UserDto {
     private String name;
     private String password;
     private String token;
+    private String githubToken;
     private Role role;
     private LocalDateTime createDate;
 
-    public UserDto(UserInfo user) {
+    public UserDto(UserInfoDocument user) {
         BeanUtils.copyProperties(user, this);
         this.password = "secret";
     }
@@ -50,9 +51,9 @@ public class UserDto {
         }
     }
 
-    public UserInfo toUser() {
+    public UserInfoDocument toUser() {
         this.doDefault();
-        UserInfo user = new UserInfo();
+        UserInfoDocument user = new UserInfoDocument();
         BeanUtils.copyProperties(this, user);
         user.setPassword(new BCryptPasswordEncoder().encode(this.password));
         return user;

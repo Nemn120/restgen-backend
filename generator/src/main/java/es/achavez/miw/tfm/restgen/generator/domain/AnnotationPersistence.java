@@ -72,7 +72,7 @@ public enum AnnotationPersistence {
     SECURITY_SCHEME_TYPE("SecuritySchemeType", "io.swagger.v3.oas.annotations.enums.SecuritySchemeType"),
     SECURITY_SCHEME_IN("SecuritySchemeIn", "io.swagger.v3.oas.annotations.enums.SecuritySchemeIn"),
     OPEN_API("OpenAPI", "io.swagger.v3.oas.models.OpenAPI"),
-    OPEN_API_INFO("Info", "io.swagger.v3.oas.annotations.info.Info"),
+    OPEN_API_INFO("Info", "io.swagger.v3.oas.models.info.Info"),
     OPEN_API_GROUPED("GroupedOpenApi", "org.springdoc.core.models.GroupedOpenApi");
 
 

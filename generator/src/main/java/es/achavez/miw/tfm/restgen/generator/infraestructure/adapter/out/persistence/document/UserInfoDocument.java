@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "users")
-public class UserInfo {
+public class UserInfoDocument {
 
     @Id
     private String id;
@@ -18,7 +18,7 @@ public class UserInfo {
 
     private LocalDateTime createDate;
 
-    public UserInfo(String id, String name, String email, String password, Role role, LocalDateTime createDate) {
+    public UserInfoDocument(String id, String name, String email, String password, Role role, LocalDateTime createDate) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -35,7 +35,7 @@ public class UserInfo {
         this.role = role;
     }
 
-    public UserInfo() {
+    public UserInfoDocument() {
     }
 
     public String getId() {

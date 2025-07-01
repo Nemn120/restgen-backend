@@ -14,11 +14,11 @@ import org.jboss.forge.roaster.model.source.MethodSource;
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.AUTOWIRED;
 
 
-public class ServiceImplClassDecorator<T extends JavaClassSource> extends JavaClassAbstractDecorator<T> {
+public class ServiceImplClassGenerator<T extends JavaClassSource> extends JavaClassTemplate<T> {
 
     public static final String BEAN_NAME = ".BEAN_NAME";
 
-    public ServiceImplClassDecorator(T javaClassSource, JavaClass javaClassDTO, MavenProjectPath mavenProjectPath) {
+    public ServiceImplClassGenerator(T javaClassSource, JavaClass javaClassDTO, MavenProjectPath mavenProjectPath) {
         super(javaClassSource, javaClassDTO, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.SERVICE_IMPL;
     }

@@ -21,12 +21,12 @@ class ServiceImplClassDecoratorTest {
     @Mock
     private MavenProjectPath mavenProjectPath;
 
-    private ServiceImplClassDecorator<JavaClassSource> serviceImplClassDecorator;
+    private ServiceImplClassGenerator<JavaClassSource> serviceImplClassDecorator;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        serviceImplClassDecorator = new ServiceImplClassDecorator<>(javaClassSource, javaClass, mavenProjectPath);
+        serviceImplClassDecorator = new ServiceImplClassGenerator<>(javaClassSource, javaClass, mavenProjectPath);
     }
 
     @Test

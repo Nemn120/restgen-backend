@@ -10,9 +10,9 @@ import org.jboss.forge.roaster.model.source.JavaInterfaceSource;
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
 
 
-public class ServiceClassDecorator<T extends JavaInterfaceSource> extends JavaClassAbstractDecorator<T> {
+public class ServiceClassGenerator<T extends JavaInterfaceSource> extends JavaClassTemplate<T> {
 
-    public ServiceClassDecorator(T javaInterfaceSource, JavaClass JavaClass, MavenProjectPath mavenProjectPath) {
+    public ServiceClassGenerator(T javaInterfaceSource, JavaClass JavaClass, MavenProjectPath mavenProjectPath) {
         super(javaInterfaceSource, JavaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.SERVICE;
     }

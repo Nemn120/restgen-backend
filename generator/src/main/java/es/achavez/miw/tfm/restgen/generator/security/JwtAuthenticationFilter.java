@@ -1,7 +1,7 @@
 package es.achavez.miw.tfm.restgen.generator.security;
 
+import es.achavez.miw.tfm.restgen.generator.application.port.in.JwtUsesCases;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.Role;
-import es.achavez.miw.tfm.restgen.generator.application.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION = "Authorization";
 
     @Autowired
-    private JwtService jwtService;
+    private JwtUsesCases jwtUsesCases;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain chain)
@@ -49,11 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = jwtService.extractToken(request.getHeader(AUTHORIZATION));
+            String token = jwtUsesCases.extractToken(request.getHeader(AUTHORIZATION));
             if (!token.isEmpty()) {
-                GrantedAuthority authority = new SimpleGrantedAuthority(Role.PREFIX + jwtService.role(token));
+                GrantedAuthority authority = new SimpleGrantedAuthority(Role.PREFIX + jwtUsesCases.role(token));
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(jwtService.user(token), null, List.of(authority));
+                        new UsernamePasswordAuthenticationToken(jwtUsesCases.user(token), null, List.of(authority));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }

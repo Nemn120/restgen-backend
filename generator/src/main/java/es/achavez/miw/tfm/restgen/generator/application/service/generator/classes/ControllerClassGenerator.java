@@ -9,9 +9,9 @@ import org.jboss.forge.roaster.model.source.MethodSource;
 
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
 
-public class ControllerClassDecorator<T extends JavaInterfaceSource> extends JavaClassAbstractDecorator<T> {
+public class ControllerClassGenerator<T extends JavaInterfaceSource> extends JavaClassTemplate<T> {
 
-    public ControllerClassDecorator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+    public ControllerClassGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         super(javaClassSource, javaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.CONTROLLER;
     }

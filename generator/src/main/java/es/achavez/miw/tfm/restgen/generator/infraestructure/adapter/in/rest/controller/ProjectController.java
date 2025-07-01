@@ -1,7 +1,7 @@
 package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.controller;
 
-import es.achavez.miw.tfm.restgen.generator.application.service.GeneratorService;
-import es.achavez.miw.tfm.restgen.generator.application.service.ProjectService;
+import es.achavez.miw.tfm.restgen.generator.application.port.in.GeneratorUsesCases;
+import es.achavez.miw.tfm.restgen.generator.application.port.in.ProjectUsesCases;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.*;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.mapper.ProjectRestMapper;
@@ -21,25 +21,25 @@ public class ProjectController {
 
     public static final String API_PROJECTS = "/api/projects";
 
-    private final ProjectService projectService;
+    private final ProjectUsesCases projectUsesCases;
     private final ProjectRestMapper projectMapper;
-    private final GeneratorService generatorService;
+    private final GeneratorUsesCases generatorUsesCases;
 
     @Autowired
-    public ProjectController(ProjectService projectService, ProjectRestMapper projectMapper, GeneratorService generatorService) {
-        this.projectService = projectService;
+    public ProjectController(ProjectUsesCases projectUsesCases, ProjectRestMapper projectMapper, GeneratorUsesCases generatorUsesCases) {
+        this.projectUsesCases = projectUsesCases;
         this.projectMapper = projectMapper;
-        this.generatorService = generatorService;
+        this.generatorUsesCases = generatorUsesCases;
     }
 
     @GetMapping
     public List<FindAllProjectResponseDTO> findAll() {
-        return projectMapper.mapToFindProjectResponse(projectService.findAll());
+        return projectMapper.mapToFindProjectResponse(projectUsesCases.findAll());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<GetProjectResponseDTO> findById(@PathVariable String id) {
-        Project project = projectService.findById(id);
+        Project project = projectUsesCases.findById(id);
         GetProjectResponseDTO projectDTO = projectMapper.mapToGetProjectResponse(project);
         return ResponseEntity.ok(projectDTO);
     }
@@ -47,7 +47,7 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<?> create(@RequestBody ProjectRequestDTO projectDTO) {
         Project project = projectMapper.mapCreateToDomain(projectDTO);
-        Project savedProject = projectService.save(project);
+        Project savedProject = projectUsesCases.save(project);
         return ResponseEntity.created(URI.create(API_PROJECTS + savedProject.getId())).build();
     }
 
@@ -55,32 +55,32 @@ public class ProjectController {
     public ResponseEntity<?> update(@PathVariable String id, @RequestBody ProjectRequestDTO projectDTO) {
         Project project = projectMapper.mapCreateToDomain(projectDTO);
         project.setId(id);
-        Project savedProject = projectService.update(project);
+        Project savedProject = projectUsesCases.update(project);
         return ResponseEntity.ok(savedProject);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        projectService.deleteById(id);
+        projectUsesCases.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/generate")
     public ResponseEntity<String> generate(@RequestBody ProjectIdDTO generate) throws IOException {
-        generatorService.execute(generate.id());
+        generatorUsesCases.generate(generate.id());
         return ResponseEntity.ok("Project generated");
     }
 
     @GetMapping("/clone")
     public ResponseEntity<ProjectIdDTO> clone(@RequestBody ProjectIdDTO id) {
-        String idProject = projectService.cloneProject(id.id());
+        String idProject = projectUsesCases.cloneProject(id.id());
         ProjectIdDTO projectIdDTO = new ProjectIdDTO(idProject);
         return ResponseEntity.ok(projectIdDTO);
     }
 
     @PostMapping("/saveAndGenerate")
     public ResponseEntity<ProjectIdDTO> saveAnGenerate(@RequestBody Project project) {
-        Project saved = projectService.save(project);
+        Project saved = projectUsesCases.save(project);
         ProjectIdDTO projectIdDTO = new ProjectIdDTO(saved.getId());
         return ResponseEntity.ok(projectIdDTO);
     }
@@ -88,7 +88,7 @@ public class ProjectController {
     @GetMapping(value = "/{id}/download", produces ="application/zip")
     public ResponseEntity<StreamingResponseBody> getStreamingResponseBodyResponseEntity(
             @PathVariable String id) throws Exception {
-        StreamingResponseBody responseBody = projectService.download(id);
+        StreamingResponseBody responseBody = projectUsesCases.download(id);
         return ResponseEntity
                 .ok()
                 .header("Content-Disposition", "attachment;filename=" + id + ".zip")
@@ -98,11 +98,23 @@ public class ProjectController {
 
     @GetMapping("/{id}/diagram")
     public ResponseEntity<GetDiagramDTO> getPlantUmlDiagram(@PathVariable String id) {
-        Project project = projectService.findDiagramPlantUmlById(id);
+        Project project = projectUsesCases.findDiagramPlantUmlById(id);
         if (project == null || project.getPlantUmlDiagram() == null) {
             return ResponseEntity.notFound().build();
         }
         GetDiagramDTO diagramDTO = new GetDiagramDTO(project.getPlantUmlDiagram());
         return ResponseEntity.ok(diagramDTO);
+    }
+
+    @PostMapping("/upload/{projectId}")
+    public ResponseEntity<String> uploadProjectToGitHub(
+            @PathVariable String projectId,
+            @RequestBody GitHubUploadDto dto) {
+        try {
+            projectUsesCases.uploadToGitHub(projectId, dto);
+            return ResponseEntity.ok("Proyecto subido exitosamente a GitHub.");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al subir el proyecto: " + e.getMessage());
+        }
     }
 }

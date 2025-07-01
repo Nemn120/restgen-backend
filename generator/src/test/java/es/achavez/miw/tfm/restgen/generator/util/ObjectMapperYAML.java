@@ -1,4 +1,4 @@
-package es.achavez.miw.tfm.restgen.generator.application.service.generator;
+package es.achavez.miw.tfm.restgen.generator.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

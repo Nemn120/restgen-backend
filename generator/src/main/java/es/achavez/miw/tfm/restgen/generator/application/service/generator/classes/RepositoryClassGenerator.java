@@ -7,17 +7,11 @@ import es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence;
 import es.achavez.miw.tfm.restgen.generator.domain.DataTypes;
 import es.achavez.miw.tfm.restgen.generator.domain.DirectoryLayerPath;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jboss.forge.roaster.model.source.JavaInterfaceSource;
 
-import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.GENERIC_SERVICE;
+public class RepositoryClassGenerator<T extends JavaInterfaceSource> extends JavaClassTemplate<T> {
 
-public class RepositoryClassDecorator<T extends JavaInterfaceSource> extends JavaClassAbstractDecorator<T> {
-
-    private static Logger logger = LogManager.getLogger(RepositoryClassDecorator.class);
-
-    public RepositoryClassDecorator(T javaInterfaceSource, JavaClass JavaClass, MavenProjectPath mavenProjectPath) {
+    public RepositoryClassGenerator(T javaInterfaceSource, JavaClass JavaClass, MavenProjectPath mavenProjectPath) {
         super(javaInterfaceSource, JavaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.REPOSITORY;
     }

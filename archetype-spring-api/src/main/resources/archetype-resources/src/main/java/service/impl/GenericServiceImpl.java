@@ -89,13 +89,15 @@ public abstract class GenericServiceImpl<E, D, I> implements GenericService<E, D
     }
 
     @Override
-    public CustomPage<D> findByAttributesAndPaginationAndSort(D dto, Pageable pageable, String sortField, Sort.Direction direction) {
+    public CustomPage<D> findByAttributesAndPaginationAndSort(
+            D dto, Pageable pageable, String sortField, Sort.Direction direction) {
         Sort sort = Sort.by(direction, sortField);
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
         Page<D> page = getRepo().findAll(
                         getSpecificationFromFilter(dto), pageRequest)
                 .map(getMapper()::toDto);
-        return new CustomPage<>(page.getContent(), pageable, page.getTotalElements(),  page.getTotalPages(), sortField, direction);
+        return new CustomPage<>(
+                page.getContent(), pageable, page.getTotalElements(),  page.getTotalPages(), sortField, direction);
     }
 
     @Override

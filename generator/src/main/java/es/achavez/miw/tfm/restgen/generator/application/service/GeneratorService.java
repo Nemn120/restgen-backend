@@ -1,11 +1,12 @@
 package es.achavez.miw.tfm.restgen.generator.application.service;
 
+import es.achavez.miw.tfm.restgen.generator.application.port.in.GeneratorUsesCases;
 import es.achavez.miw.tfm.restgen.generator.application.port.out.FileRepository;
 import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectRepository;
 import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
-import es.achavez.miw.tfm.restgen.generator.application.service.generator.GeneratedJavaClass;
+import es.achavez.miw.tfm.restgen.generator.application.service.generator.JavaClassGenerator;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.ConfigurationPath;
-import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.GeneratedProject;
+import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.GenerateArchetype;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.MavenProjectPath;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.MavenPropertiesArchetype;
 import es.achavez.miw.tfm.restgen.generator.domain.*;
@@ -20,18 +21,19 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
-public class GeneratorService {
+public class GeneratorService implements GeneratorUsesCases {
 
     private static final Logger LOG = LoggerFactory.getLogger(GeneratorService.class);
 
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
-    private GeneratedJavaClass generatedJavaClass;
+    private JavaClassGenerator javaClassGenerator;
     @Autowired
     private FileRepository fileRepository;
 
-    public void execute(String projectId) throws IOException {
+    @Override
+    public void generate(String projectId) throws IOException {
         LOG.info("EasyRestGeneratorService :: execute()");
 
         Project project = projectRepository.findById(projectId).orElseThrow(() -> new NotFoundException("Project not found"));
@@ -64,10 +66,10 @@ public class GeneratorService {
     private void generateProject(Project project, String uuid) throws IOException {
         ConfigurationPath configurationPath = new ConfigurationPath(uuid);
         MavenProjectPath mavenProjectPath = createMavenProjectPath(project, configurationPath);
-        GeneratedProject generatedProject = new GeneratedProject(mavenProjectPath);
-        generatedProject.createProjectFromArchetype(configurationPath.getApplicationPath());
+        GenerateArchetype generateArchetype = new GenerateArchetype(mavenProjectPath);
+        generateArchetype.createProjectFromArchetype(configurationPath.getApplicationPath());
 
-        generatedJavaClass.generate(project, mavenProjectPath);
+        javaClassGenerator.generate(project, mavenProjectPath);
     }
 
     private MavenProjectPath createMavenProjectPath(Project project, ConfigurationPath configurationPath) {
@@ -76,7 +78,7 @@ public class GeneratorService {
         return new MavenProjectPath(basePath, mavenPropertiesArchetype);
     }
 
-    public MavenPropertiesArchetype mapInMavenProperties(Project project) {
+    private MavenPropertiesArchetype mapInMavenProperties(Project project) {
         ProjectProperties properties = project.getProperties();
         MavenProperties mavenProperties = properties.getMaven();
         ApplicationProperties applicationProperties = properties.getApplication();

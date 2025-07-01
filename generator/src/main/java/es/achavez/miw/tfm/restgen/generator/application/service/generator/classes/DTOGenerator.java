@@ -8,11 +8,11 @@ import org.jboss.forge.roaster.model.source.JavaClassSource;
 
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.AUDITABLE_ENTITY;
 
-public class DTODecorator<T extends JavaClassSource> extends JavaClassAbstractDecorator<T> {
+public class DTOGenerator<T extends JavaClassSource> extends JavaClassTemplate<T> {
 
-    private static final Logger logger = LogManager.getLogger(EntityClassDecorator.class);
+    private static final Logger logger = LogManager.getLogger(EntityClassGenerator.class);
 
-    public DTODecorator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+    public DTOGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         super(javaClassSource, javaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.DTO;
     }

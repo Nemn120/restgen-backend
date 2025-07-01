@@ -15,9 +15,9 @@ import java.util.List;
 
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
 
-public class MapperDecorator<T extends JavaInterfaceSource> extends JavaClassAbstractDecorator<T> {
+public class MapperGenerator<T extends JavaInterfaceSource> extends JavaClassTemplate<T> {
 
-    public MapperDecorator(T javaClassSource, JavaClass genericJavaClass, MavenProjectPath mavenProjectPath) {
+    public MapperGenerator(T javaClassSource, JavaClass genericJavaClass, MavenProjectPath mavenProjectPath) {
         super(javaClassSource, genericJavaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.MAPPER;
     }

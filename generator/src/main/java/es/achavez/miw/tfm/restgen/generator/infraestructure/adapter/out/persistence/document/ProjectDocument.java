@@ -1,5 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document;
 
+import es.achavez.miw.tfm.restgen.generator.domain.GithubRepository;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import es.achavez.miw.tfm.restgen.generator.domain.ProjectProperties;
 import es.achavez.miw.tfm.restgen.generator.domain.ProjectStatus;
@@ -31,6 +32,8 @@ public class ProjectDocument {
     private String creationUser;
     private String updateUser;
     private ProjectProperties properties;
+
+    private GithubRepository githubRepository;
 
     private List<JavaClass> classes;
 

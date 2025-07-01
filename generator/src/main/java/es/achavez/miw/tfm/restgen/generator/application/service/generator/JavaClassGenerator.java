@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class GeneratedJavaClass {
+public class JavaClassGenerator {
 
-    private static Logger logger = LogManager.getLogger(GeneratedJavaClass.class);
+    private static Logger logger = LogManager.getLogger(JavaClassGenerator.class);
 
     public void generate(Project project, MavenProjectPath mavenProjectPath) {
         List<DocketField> docketFields = new ArrayList<>();
@@ -102,7 +102,7 @@ public class GeneratedJavaClass {
     private void generateDTO(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate Service");
         final JavaClassSource dto = Roaster.create(JavaClassSource.class);
-        DTODecorator serviceClassDecorator = new DTODecorator(dto, javaClass, mavenProjectPath);
+        DTOGenerator serviceClassDecorator = new DTOGenerator(dto, javaClass, mavenProjectPath);
         serviceClassDecorator.decorate();
         generateFile(serviceClassDecorator.getJavaClassSource(), mavenProjectPath.getDTOMainPath());
     }
@@ -110,7 +110,7 @@ public class GeneratedJavaClass {
     private void generateMapper(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate Mapper");
         final JavaInterfaceSource mapper = Roaster.create(JavaInterfaceSource.class);
-        MapperDecorator mapperDecorator = new MapperDecorator(mapper, javaClass, mavenProjectPath);
+        MapperGenerator mapperDecorator = new MapperGenerator(mapper, javaClass, mavenProjectPath);
         mapperDecorator.decorate();
         generateFile(mapperDecorator.getJavaClassSource(), mavenProjectPath.getMapperMainPath());
     }
@@ -118,9 +118,9 @@ public class GeneratedJavaClass {
     private void generateSwaggerConfig(SwaggerJavaClass docProperties, MavenProjectPath mavenProjectPath) {
         if (docProperties != null) {
             final JavaClassSource swaggerClass = Roaster.create(JavaClassSource.class);
-            SwaggerDecorator swaggerDecorator = new SwaggerDecorator(swaggerClass, docProperties, mavenProjectPath);
-            swaggerDecorator.decorate();
-            generateFile(swaggerDecorator.getJavaClassSource(), mavenProjectPath.getConfigMainPath());
+            SwaggerGenerator swaggerGenerator = new SwaggerGenerator(swaggerClass, docProperties, mavenProjectPath);
+            swaggerGenerator.decorate();
+            generateFile(swaggerGenerator.getJavaClassSource(), mavenProjectPath.getConfigMainPath());
         }
     }
 
@@ -129,7 +129,7 @@ public class GeneratedJavaClass {
         logger.info("Generate Repository");
 
         final JavaInterfaceSource javaClassRepository = Roaster.create(JavaInterfaceSource.class);
-        JavaClassDecorator repositoryDecorator = new RepositoryClassDecorator(javaClassRepository, javaClass, mavenProjectPath);
+        JavaClassProcessor repositoryDecorator = new RepositoryClassGenerator(javaClassRepository, javaClass, mavenProjectPath);
         repositoryDecorator.decorate();
         print(repositoryDecorator);
         generateFile(repositoryDecorator.getJavaClassSource(), mavenProjectPath.getRepositoryMainPath());
@@ -138,7 +138,7 @@ public class GeneratedJavaClass {
     private void generateEntity(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate Entity");
         final JavaClassSource javaClassEntity = Roaster.create(JavaClassSource.class);
-        JavaClassDecorator entityDecorator = new EntityClassDecorator(javaClassEntity, javaClass, mavenProjectPath);
+        JavaClassProcessor entityDecorator = new EntityClassGenerator(javaClassEntity, javaClass, mavenProjectPath);
         entityDecorator.decorate();
         print(entityDecorator);
         generateFile(entityDecorator.getJavaClassSource(), mavenProjectPath.getEntityMainPath());
@@ -147,7 +147,7 @@ public class GeneratedJavaClass {
     private void generateService(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate Service");
         final JavaInterfaceSource service = Roaster.create(JavaInterfaceSource.class);
-        JavaClassDecorator serviceClassDecorator = new ServiceClassDecorator(service, javaClass, mavenProjectPath);
+        JavaClassProcessor serviceClassDecorator = new ServiceClassGenerator(service, javaClass, mavenProjectPath);
         serviceClassDecorator.decorate();
         generateFile(serviceClassDecorator.getJavaClassSource(), mavenProjectPath.getServiceMainPath());
     }
@@ -155,7 +155,7 @@ public class GeneratedJavaClass {
     private void generateServiceImpl(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate ServiceImpl");
         final JavaClassSource javaClassEntity = Roaster.create(JavaClassSource.class);
-        JavaClassDecorator entityDecorator = new ServiceImplClassDecorator(javaClassEntity, javaClass, mavenProjectPath);
+        JavaClassProcessor entityDecorator = new ServiceImplClassGenerator(javaClassEntity, javaClass, mavenProjectPath);
         entityDecorator.decorate();
         generateFile(entityDecorator.getJavaClassSource(), mavenProjectPath.getServiceImplMainPath());
     }
@@ -163,7 +163,7 @@ public class GeneratedJavaClass {
     private void generateController(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate Controller");
         final JavaInterfaceSource javaInterfaceSource = Roaster.create(JavaInterfaceSource.class);
-        JavaClassDecorator controllerClassDecorator = new ControllerClassDecorator(javaInterfaceSource, javaClass, mavenProjectPath);
+        JavaClassProcessor controllerClassDecorator = new ControllerClassGenerator(javaInterfaceSource, javaClass, mavenProjectPath);
         controllerClassDecorator.decorate();
         generateFile(controllerClassDecorator.getJavaClassSource(), mavenProjectPath.getControllerMainPath());
     }
@@ -171,7 +171,7 @@ public class GeneratedJavaClass {
     private void generateControllerImpl(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         logger.info("Generate ControllerImpl");
         final JavaClassSource javaClassSource = Roaster.create(JavaClassSource.class);
-        JavaClassDecorator classDecorator = new ControllerImplClassDecorator(javaClassSource, javaClass, mavenProjectPath);
+        JavaClassProcessor classDecorator = new ControllerImplClassGenerator(javaClassSource, javaClass, mavenProjectPath);
         classDecorator.decorate();
         generateFile(classDecorator.getJavaClassSource(), mavenProjectPath.getControllerImplMainPath());
     }
@@ -189,7 +189,7 @@ public class GeneratedJavaClass {
     }
 
 
-    public void print(JavaClassDecorator javaClassDecorator) {
-        System.out.println(javaClassDecorator.printClass());
+    public void print(JavaClassProcessor javaClassProcessor) {
+        System.out.println(javaClassProcessor.printClass());
     }
 }

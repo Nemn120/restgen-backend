@@ -51,7 +51,9 @@ public class GitHubOAuthService {
         if (!userResponse.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("Error al obtener la información del usuario de GitHub");
         }
+        Map<String, Object> userInfo = userResponse.getBody();
+        userInfo.put("access_token", accessToken); // Agregar el token al mapa de respuesta
 
-        return userResponse.getBody();
+        return userInfo;
     }
 }

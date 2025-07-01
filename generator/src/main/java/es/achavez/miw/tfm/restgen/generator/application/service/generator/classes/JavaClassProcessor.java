@@ -2,7 +2,7 @@ package es.achavez.miw.tfm.restgen.generator.application.service.generator.class
 
 import org.jboss.forge.roaster.model.source.JavaSource;
 
-public interface JavaClassDecorator<T extends JavaSource> {
+public interface JavaClassProcessor<T extends JavaSource> {
 
     void decorate();
 

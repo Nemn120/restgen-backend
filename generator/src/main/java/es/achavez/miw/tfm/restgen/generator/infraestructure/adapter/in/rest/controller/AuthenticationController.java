@@ -1,6 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.controller;
 
-import es.achavez.miw.tfm.restgen.generator.application.service.UserInfoService;
+import es.achavez.miw.tfm.restgen.generator.application.service.UserService;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.TokenDto;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.UserDto;
 import jakarta.validation.Valid;
@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @Log4j2
 @RestController
 @RequestMapping("/users")
-public class UserController {
+public class AuthenticationController {
 
     public static final String EMAIL = "/{email}";
     public static final String TOKEN = "/token";
 
     @Autowired
-    private UserInfoService service;
+    private UserService service;
 
     @PreAuthorize("authenticated")
     @PostMapping(value = TOKEN)

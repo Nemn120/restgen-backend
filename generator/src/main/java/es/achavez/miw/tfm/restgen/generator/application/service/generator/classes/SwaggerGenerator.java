@@ -8,13 +8,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 
-import java.util.List;
-
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
 
-public class SwaggerDecorator {
+public class SwaggerGenerator {
 
-    private static final Logger logger = LogManager.getLogger(SwaggerDecorator.class);
+    private static final Logger logger = LogManager.getLogger(SwaggerGenerator.class);
     
     private static final String swaggerClassName = "Swagger";
 
@@ -23,7 +21,7 @@ public class SwaggerDecorator {
     protected MavenProjectPath mavenProjectPath;
     protected PackageDirectory packageDirectory;
 
-    public SwaggerDecorator(JavaClassSource javaClassSource, SwaggerJavaClass swaggerJavaClass, MavenProjectPath mavenProjectPath) {
+    public SwaggerGenerator(JavaClassSource javaClassSource, SwaggerJavaClass swaggerJavaClass, MavenProjectPath mavenProjectPath) {
         this.swaggerJavaClass = swaggerJavaClass;
         this.javaClassSource = javaClassSource;
         this.packageDirectory = new PackageDirectory(this.swaggerJavaClass, mavenProjectPath);
@@ -32,16 +30,19 @@ public class SwaggerDecorator {
     public void decorate() {
         logger.info("decorate: decorando: "+ this.getClass().getSimpleName());
         addPackageClass();
-        String swaggerClassName = SwaggerDecorator.swaggerClassName + DirectoryLayerPath.CONFIG.getClassName();
+        String swaggerClassName = SwaggerGenerator.swaggerClassName + DirectoryLayerPath.CONFIG.getClassName();
         javaClassSource.setName(swaggerClassName);
 
         addAnnotationAndImport(CONFIGURATION);
-        addAnnotationAndImport(SECURITY_SCHEME);
         javaClassSource.addImport(SECURITY_SCHEME_TYPE.getPackageName());
         javaClassSource.addImport(SECURITY_SCHEME_IN.getPackageName());
         javaClassSource.addImport(OPEN_API_GROUPED.getPackageName());
         javaClassSource.addImport(OPEN_API.getPackageName());
         javaClassSource.addImport(OPEN_API_INFO.getPackageName());
+
+        javaClassSource.addImport("org.springframework.context.annotation.Bean");
+        javaClassSource.addImport("io.swagger.v3.oas.models.info.Info");
+
 
         addSecuritySchemeAnnotation();
         addGroupedOpenApiMethods(swaggerJavaClass);

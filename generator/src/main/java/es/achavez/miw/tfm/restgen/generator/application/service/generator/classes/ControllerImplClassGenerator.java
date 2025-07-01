@@ -10,9 +10,9 @@ import org.jboss.forge.roaster.model.source.MethodSource;
 
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
 
-public class ControllerImplClassDecorator<T extends JavaClassSource> extends JavaClassAbstractDecorator<T> {
+public class ControllerImplClassGenerator<T extends JavaClassSource> extends JavaClassTemplate<T> {
 
-    public ControllerImplClassDecorator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+    public ControllerImplClassGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         super(javaClassSource, javaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.CONTROLLER_IMPL;
     }
@@ -61,6 +61,9 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
                 .setVisibility(Visibility.PRIVATE)
                 .addAnnotation(AnnotationPersistence.AUTOWIRED.getAnnotationName());
 
+        getJavaClassSource().addImport("org.springframework.web.bind.annotation.RequestHeader");
+        getJavaClassSource().addImport("org.springframework.web.bind.annotation.ModelAttribute");
+
         generateFindByIdMethod(dtoName);
         generateFindAllMethod(dtoName);
         generateSaveMethod(dtoName);
@@ -69,13 +72,14 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         generateSearchMethod(dtoName);
     }
 
+
     private void generateFindByIdMethod(String dtoName) {
         MethodSource<JavaClassSource> method = getJavaClassSource().addMethod();
         method.setName("findById");
         method.setReturnType("ResponseEntity<GenericResponse<" + dtoName + ">>");
         method.setVisibility(Visibility.PUBLIC);
         method.addAnnotation(AnnotationPersistence.GET_MAPPING.getAnnotationName());
-        method.addParameter("Long id", "");
+        method.addParameter("Long id", "").addAnnotation("PathVariable");
         method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: findById()\");\n" +
                        dtoName + " dto = service.findById(id);\n" +
                        "return ResponseEntityUtil.createResponse(dto, \"" + javaClass.getName() + " found\", HttpStatus.OK);");
@@ -98,7 +102,7 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         method.setReturnType("ResponseEntity<GenericResponse<" + dtoName + ">>");
         method.setVisibility(Visibility.PUBLIC);
         method.addAnnotation(AnnotationPersistence.POST_MAPPING.getAnnotationName());
-        method.addParameter(dtoName + " obj", "");
+        method.addParameter(dtoName + " obj", "").addAnnotation("RequestBody");
         method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: save()\");\n" +
                        dtoName + " dto = service.save(obj);\n" +
                        "return ResponseEntityUtil.createResponse(dto, \"" + javaClass.getName() + " save success\", HttpStatus.CREATED);");
@@ -110,8 +114,8 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         method.setReturnType("ResponseEntity<GenericResponse<" + dtoName + ">>");
         method.setVisibility(Visibility.PUBLIC);
         method.addAnnotation(AnnotationPersistence.PUT_MAPPING.getAnnotationName());
-        method.addParameter("Long id", "");
-        method.addParameter(dtoName + " obj", "");
+        method.addParameter("Long id", "").addAnnotation("PathVariable");
+        method.addParameter(dtoName + " obj", "").addAnnotation("RequestBody");
         method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: update()\");\n" +
                        "obj.setId(id);\n" +
                        dtoName + " dto = service.update(obj);\n" +
@@ -124,7 +128,7 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         method.setReturnType("ResponseEntity<Void>");
         method.setVisibility(Visibility.PUBLIC);
         method.addAnnotation(AnnotationPersistence.DELETE_MAPPING.getAnnotationName());
-        method.addParameter("Long id", "");
+        method.addParameter("Long id", "").addAnnotation("PathVariable");
         method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: delete()\");\n" +
                        "service.delete(id);\n" +
                        "return ResponseEntityUtil.createEmptyResponse(\"" + javaClass.getName() + " delete success\", HttpStatus.OK);");
@@ -135,12 +139,32 @@ public class ControllerImplClassDecorator<T extends JavaClassSource> extends Jav
         method.setName("search");
         method.setReturnType("ResponseEntity<CustomPage<" + dtoName + ">>");
         method.setVisibility(Visibility.PUBLIC);
-        method.addAnnotation(AnnotationPersistence.GET_MAPPING.getAnnotationName());
-        method.addParameter("int page", "");
-        method.addParameter("int size", "");
-        method.addParameter("String sortField", "");
-        method.addParameter("Direction direction", "");
-        method.addParameter(dtoName + " filterDto", "");
+        method.addAnnotation(AnnotationPersistence.GET_MAPPING.getAnnotationName())
+                .setStringValue("value", "/search");
+
+        method.addParameter("int page", "")
+                .addAnnotation("RequestHeader")
+                .setStringValue("name", "_pageNumber")
+                .setStringValue("defaultValue", "1");
+
+        method.addParameter("int size", "")
+                .addAnnotation("RequestHeader")
+                .setStringValue("name", "_pageSize")
+                .setStringValue("defaultValue", "10");
+
+        method.addParameter("String sortField", "")
+                .addAnnotation("RequestHeader")
+                .setStringValue("name", "_sortField")
+                .setStringValue("defaultValue", "id");
+
+        method.addParameter("Direction direction", "")
+                .addAnnotation("RequestHeader")
+                .setStringValue("name", "_sortDirection")
+                .setStringValue("defaultValue", "ASC");
+
+        method.addParameter(dtoName + " filterDto", "")
+                .addAnnotation("ModelAttribute");
+
         method.setBody("Pageable pageable = PageRequest.of(page - 1, size);\n" +
                        "CustomPage<" + dtoName + "> dtos = service.findByAttributesAndPaginationAndSort(filterDto, pageable, sortField, direction);\n" +
                        "return ResponseEntityUtil.createCustomPageResponse(dtos, \"Search found\", HttpStatus.OK);");

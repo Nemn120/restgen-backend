@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.nio.file.Path;
 
-@Data
 public class MavenProjectPath {
 
     private static final Logger LOG = LoggerFactory.getLogger(MavenProjectPath.class);
@@ -48,33 +47,6 @@ public class MavenProjectPath {
         return groupIdWithoutDashes;
     }
 
-    public String getEntityMainPackage() {
-        return String.format("%s.entity;", getGroupIdPackage());
-    }
-
-    public String getServiceMainPackage() {
-        return String.format("%s.service;", getGroupIdPackage());
-    }
-
-    public String getServiceImplMainPackage() {
-        return String.format("%s.service.impl;", getGroupIdPackage());
-    }
-
-    public String getControllerMainPackage() {
-        return String.format("%s.controller;", getGroupIdPackage());
-    }
-
-    public String getControllerImplMainPackage() {
-        return String.format("%s.controller.impl;", getGroupIdPackage());
-    }
-
-    private String getSwaggerConfigPackage() {
-        return String.format("%s.config;", getGroupIdPackage());
-    }
-
-    public String getRepositoryMainPackage() {
-        return String.format("%s.repository;", getGroupIdPackage());
-    }
 
     private Path concatSubPackagePath(Path path, String subPackage) {
         return path.resolve(subPackage);
@@ -104,24 +76,12 @@ public class MavenProjectPath {
         return concatSubPackagePath(concatGroupIdPath(javaMainPath), "repository");
     }
 
-    public Path getSwaggerMainPath() {
-        return concatSubPackagePath(concatGroupIdPath(javaMainPath), "config");
-    }
-
-    public String getDTOMainPackage() {
-        return String.format("%s.dto;", getGroupIdPackage());
-    }
-
     public Path getMapperMainPath() {
         return concatSubPackagePath(concatGroupIdPath(javaMainPath), "mapper");
     }
 
     public Path getDTOMainPath() {
         return concatSubPackagePath(concatGroupIdPath(javaMainPath), "dto");
-    }
-
-    public String getMapperMainPackage() {
-        return String.format("%s.mapper;", getGroupIdPackage());
     }
 
     public Path getGroupIdPath() {
@@ -132,4 +92,11 @@ public class MavenProjectPath {
         return concatSubPackagePath(concatGroupIdPath(javaMainPath), "config");
     }
 
+    public String getGroupIdWithoutDashes() {
+        return groupIdWithoutDashes;
+    }
+
+    public MavenPropertiesArchetype getMavenPropertiesArchetype() {
+        return mavenPropertiesArchetype;
+    }
 }

@@ -13,13 +13,13 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-public class GeneratedProject {
+public class GenerateArchetype {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GeneratedProject.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GenerateArchetype.class);
 
     private final MavenProjectPath mavenProjectPath;
 
-    public GeneratedProject(MavenProjectPath mavenProjectPath) {
+    public GenerateArchetype(MavenProjectPath mavenProjectPath) {
         this.mavenProjectPath = mavenProjectPath;
     }
 
@@ -86,9 +86,9 @@ public class GeneratedProject {
                 8080
         );
         MavenProjectPath mavenProjectPath = new MavenProjectPath(Path.of("generate"), mavenPropertiesArchetype);
-        GeneratedProject generatedProject = new GeneratedProject(mavenProjectPath);
+        GenerateArchetype generateArchetype = new GenerateArchetype(mavenProjectPath);
         try {
-            generatedProject.createProjectFromArchetype(Path.of("generate"));
+            generateArchetype.createProjectFromArchetype(Path.of("generate"));
         } catch (IOException e) {
             LOG.error("Error creating project from archetype: ", e);
         }

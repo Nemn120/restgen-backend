@@ -24,7 +24,9 @@ public class Project {
     private LocalDateTime updateDate;
     private String creationUser;
     private String updateUser;
+
     private ProjectProperties properties;
+    private GithubRepository githubRepository;
 
     private List<JavaClass> classes;
 
@@ -42,6 +44,7 @@ public class Project {
                 .creationUser(this.creationUser)
                 .updateUser(this.updateUser)
                 .properties(this.properties)
+                .githubRepository(this.githubRepository)
                 .classes(this.classes != null ? new ArrayList<>(this.classes) : null)
                 .build();
     }
