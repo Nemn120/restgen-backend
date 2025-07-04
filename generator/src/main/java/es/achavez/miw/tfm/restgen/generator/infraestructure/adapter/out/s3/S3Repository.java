@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.achavez.miw.tfm.restgen.generator.domain.GithubRepository;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.GitHubUploadDto;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.URIish;
@@ -13,18 +15,23 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @Service
 public class S3Repository {
+
+    private static final Logger logger = LogManager.getLogger(S3Repository.class);
+
 
     private final AmazonS3 amazonS3;
     
@@ -39,25 +46,73 @@ public class S3Repository {
         if (!folder.isDirectory()) {
             throw new IllegalArgumentException("The provided file is not a folder.");
         }
+        long startTime = System.currentTimeMillis();
         try {
             uploadFolderRecursive(uuid, folder, "");
         } catch (Exception e) {
             e.printStackTrace();
         }
+        long endTime = System.currentTimeMillis();
+        logger.info("Tiempo total de subida a S3: " + (endTime - startTime) + " ms");
     }
 
     private void uploadFolderRecursive(String uuid, File folder, String parentPath) {
         File[] files = folder.listFiles();
         if (files != null) {
-            for (File file : files) {
+            Stream.of(files).parallel().forEach(file -> {
                 String s3Key = uuid + "/" + parentPath + file.getName();
                 if (file.isDirectory()) {
                     uploadFolderRecursive(uuid, file, parentPath + file.getName() + "/");
                 } else if (file.isFile()) {
-                    PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, file));
-                    if (putObjectResult == null) {
-                        throw new RuntimeException("Failed to upload file: " + file.getName());
+                    CompletableFuture.runAsync(() -> {
+                        PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, file));
+                        if (putObjectResult == null) {
+                            throw new RuntimeException("Failed to upload file: " + file.getName());
+                        }
+                    }).join();
+                }
+            });
+        }
+    }
+
+
+    public void uploadFolderAsZip(String uuid, File folder)  {
+        if (!folder.isDirectory()) {
+            throw new IllegalArgumentException("The provided file is not a folder.");
+        }
+        File zipFile = new File(System.getProperty("java.io.tmpdir"), uuid + ".zip");
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
+            zipFolder(folder, folder.getName(), zos);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        long startTime = System.currentTimeMillis();
+        PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(bucketName, uuid + ".zip", zipFile));
+        if (putObjectResult == null) {
+            throw new RuntimeException("Failed to upload ZIP file: " + zipFile.getName());
+        }
+        long endTime = System.currentTimeMillis();
+        logger.info("Tiempo total de subida del ZIP a S3: " + (endTime - startTime) + " ms");
+        zipFile.delete();
+    }
+
+    private void zipFolder(File folder, String parentFolder, ZipOutputStream zos) throws IOException {
+        for (File file : folder.listFiles()) {
+            if (file.isDirectory()) {
+                zipFolder(file, parentFolder + "/" + file.getName(), zos);
+            } else {
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    ZipEntry zipEntry = new ZipEntry(parentFolder + "/" + file.getName());
+                    zos.putNextEntry(zipEntry);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = fis.read(buffer)) > 0) {
+                        zos.write(buffer, 0, length);
                     }
+                    zos.closeEntry();
                 }
             }
         }
@@ -121,7 +176,6 @@ public class S3Repository {
     }
 
     private boolean repositoryExists(GitHubUploadDto uploadGithub) throws IOException {
-        //URL url = new URL("https://api.github.com/repos/" + uploadGithub.username() + "/" + uploadGithub.projectName());
         URL url = new URL("https://api.github.com/repos/" + "/" + uploadGithub.projectName());
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -194,5 +248,14 @@ public class S3Repository {
                     .setRemote("origin")
                     .call();
         }
+    }
+
+    public InputStream downloadZip(String uuid) throws IOException {
+        S3Object s3Object = amazonS3.getObject(new GetObjectRequest(bucketName, uuid + ".zip"));
+        InputStream inputStream = s3Object.getObjectContent();
+        if (inputStream == null) {
+            throw new FileNotFoundException("File not found in S3: " + uuid + ".zip");
+        }
+        return inputStream;
     }
 }

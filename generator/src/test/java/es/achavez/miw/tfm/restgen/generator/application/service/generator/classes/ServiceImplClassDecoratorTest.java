@@ -26,7 +26,7 @@ class ServiceImplClassDecoratorTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        serviceImplClassDecorator = new ServiceImplClassGenerator<>(javaClassSource, javaClass, mavenProjectPath);
+        serviceImplClassDecorator = new ServiceImplClassGenerator<>(javaClass, mavenProjectPath);
     }
 
     @Test

@@ -6,12 +6,13 @@ import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.*;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.mapper.ProjectRestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 
@@ -24,7 +25,6 @@ public class ProjectController {
     private final ProjectUsesCases projectUsesCases;
     private final ProjectRestMapper projectMapper;
     private final GeneratorUsesCases generatorUsesCases;
-
     @Autowired
     public ProjectController(ProjectUsesCases projectUsesCases, ProjectRestMapper projectMapper, GeneratorUsesCases generatorUsesCases) {
         this.projectUsesCases = projectUsesCases;
@@ -33,8 +33,14 @@ public class ProjectController {
     }
 
     @GetMapping
-    public List<FindAllProjectResponseDTO> findAll() {
-        return projectMapper.mapToFindProjectResponse(projectUsesCases.findAll());
+    public List<FindAllProjectResponseDTO> findAllPublic() {
+        return projectMapper.mapToFindProjectResponse(projectUsesCases.findAllPublic());
+    }
+
+    @GetMapping("/my-projects")
+    public List<FindAllProjectResponseDTO> findAllMyProjects(@RequestHeader("Authorization") String token) {
+        return projectMapper.mapToFindProjectResponse(
+                projectUsesCases.findByUser(token));
     }
 
     @GetMapping("/{id}")
@@ -86,14 +92,15 @@ public class ProjectController {
     }
 
     @GetMapping(value = "/{id}/download", produces ="application/zip")
-    public ResponseEntity<StreamingResponseBody> getStreamingResponseBodyResponseEntity(
+    public ResponseEntity<InputStreamResource> getStreamingResponseBodyResponseEntity(
             @PathVariable String id) throws Exception {
-        StreamingResponseBody responseBody = projectUsesCases.download(id);
+        InputStream responseBody = projectUsesCases.download(id);
+        InputStreamResource resource = new InputStreamResource(responseBody);
         return ResponseEntity
                 .ok()
                 .header("Content-Disposition", "attachment;filename=" + id + ".zip")
-                .contentType(MediaType.valueOf("application/zip"))
-                .body(responseBody);
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
     @GetMapping("/{id}/diagram")

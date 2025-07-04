@@ -4,16 +4,12 @@ import es.achavez.miw.tfm.restgen.generator.application.service.generator.archet
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.directory.PackageDirectory;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.directory.PackageDirectoryLayer;
 import es.achavez.miw.tfm.restgen.generator.domain.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
 
 public class SwaggerGenerator {
 
-    private static final Logger logger = LogManager.getLogger(SwaggerGenerator.class);
-    
     private static final String swaggerClassName = "Swagger";
 
     protected JavaClassSource javaClassSource;
@@ -28,7 +24,6 @@ public class SwaggerGenerator {
     }
 
     public void decorate() {
-        logger.info("decorate: decorando: "+ this.getClass().getSimpleName());
         addPackageClass();
         String swaggerClassName = SwaggerGenerator.swaggerClassName + DirectoryLayerPath.CONFIG.getClassName();
         javaClassSource.setName(swaggerClassName);

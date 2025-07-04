@@ -4,9 +4,14 @@ import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persiste
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 
+import java.util.List;
+
 public interface ProjectMongoRepository extends MongoRepository<ProjectDocument, String> {
 
     @Query(value = "{ '_id': ?0 }", fields = "{ 'plantUmlDiagram': 1 }")
     ProjectDocument findPlantUmlDiagramById(String id);
 
+    List<ProjectDocument> findByCreationUser(String user);
+
+    List<ProjectDocument> findByIsPrivate(Boolean isPrivate);
 }

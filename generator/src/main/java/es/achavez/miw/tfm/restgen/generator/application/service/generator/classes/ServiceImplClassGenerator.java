@@ -5,6 +5,7 @@ import es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence;
 import es.achavez.miw.tfm.restgen.generator.domain.DataTypes;
 import es.achavez.miw.tfm.restgen.generator.domain.DirectoryLayerPath;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
+import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.Visibility;
 import org.jboss.forge.roaster.model.source.AnnotationSource;
 import org.jboss.forge.roaster.model.source.FieldSource;
@@ -18,8 +19,8 @@ public class ServiceImplClassGenerator<T extends JavaClassSource> extends JavaCl
 
     public static final String BEAN_NAME = ".BEAN_NAME";
 
-    public ServiceImplClassGenerator(T javaClassSource, JavaClass javaClassDTO, MavenProjectPath mavenProjectPath) {
-        super(javaClassSource, javaClassDTO, mavenProjectPath);
+    public ServiceImplClassGenerator(JavaClass javaClassDTO, MavenProjectPath mavenProjectPath) {
+        super((T) Roaster.create(JavaClassSource.class), javaClassDTO, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.SERVICE_IMPL;
     }
 

@@ -12,7 +12,7 @@ public interface ProjectRepository {
 
     Optional<Project> findById(String id);
 
-    List<Project> findAll();
+    List<Project> findAllPublic();
 
     void deleteById(String id);
 
@@ -22,4 +22,5 @@ public interface ProjectRepository {
 
     Project findDiagramPlantUmlById(String id);
 
+    List<Project> findByCreationUser(String user);
 }

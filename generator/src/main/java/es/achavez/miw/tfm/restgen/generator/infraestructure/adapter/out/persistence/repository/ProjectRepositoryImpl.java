@@ -39,8 +39,8 @@ public class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     @Override
-    public List<Project> findAll() {
-        return mongoProjectRepository.findAll().stream()
+    public List<Project> findAllPublic() {
+        return mongoProjectRepository.findByIsPrivate(Boolean.FALSE).stream()
                 .map(projectMapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -75,5 +75,12 @@ public class ProjectRepositoryImpl implements ProjectRepository {
             return projectMapper.toDomain(plantUmlDiagramById);
         }
         return null;
+    }
+
+    @Override
+    public List<Project> findByCreationUser(String user) {
+        return mongoProjectRepository.findByCreationUser(user).stream()
+                .map(projectMapper::toDomain)
+                .collect(Collectors.toList());
     }
 }

@@ -17,39 +17,127 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class JavaClassGenerator {
 
-    private static Logger logger = LogManager.getLogger(JavaClassGenerator.class);
+    private static final Logger logger = LogManager.getLogger(JavaClassGenerator.class);
 
     public void generate(Project project, MavenProjectPath mavenProjectPath) {
-        List<DocketField> docketFields = new ArrayList<>();
+        long startTime = System.currentTimeMillis();
 
+        List<DocketField> docketFields = new ArrayList<>();
         List<JavaClass> genericJavaClasses = new ArrayList<>();
-        for (JavaClass javaClass : project.getClasses()) {
+
+        project.getClasses().parallelStream().forEach(javaClass -> {
             JavaClass javaClassGenerate = generateJavaFiles(javaClass, mavenProjectPath);
             if (javaClassGenerate != null) {
-                DocketField docketField = DocketField.builder()
-                        .apiName(javaClassGenerate.getApiName())
-                        .name(GeneratorUtil.convertCamelToSnakeCaseLower(javaClassGenerate.getName()))
-                        .camelCaseName(GeneratorUtil.convertUpperFisrtLettersAndCamelCase(javaClassGenerate.getName()))
-                        .build();
-                docketFields.add(docketField);
-                genericJavaClasses.add(javaClassGenerate);
+                synchronized (docketFields) {
+                    DocketField docketField = createDocketField(javaClassGenerate);
+                    docketFields.add(docketField);
+                }
+                synchronized (genericJavaClasses) {
+                    genericJavaClasses.add(javaClassGenerate);
+                }
             }
-        }
-        generateDTOAndMapperFile(genericJavaClasses, mavenProjectPath);
-        SwaggerJavaClass documentationSwagger = getSwaggerDocumentationJavaClass(project.getProperties(), docketFields);
+        });
+
+        generateDTOAndMapperFiles(genericJavaClasses, mavenProjectPath);
+        SwaggerJavaClass documentationSwagger = createSwaggerDocumentation(project.getProperties(), docketFields);
         generateSwaggerConfig(documentationSwagger, mavenProjectPath);
+
+        long endTime = System.currentTimeMillis();
+        logger.info("Tiempo total de generación: " + (endTime - startTime) + " ms");
     }
 
-    private SwaggerJavaClass getSwaggerDocumentationJavaClass(ProjectProperties properties, List<DocketField> docketFields) {
+    private JavaClass generateJavaFiles(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+        if (javaClass != null) {
+            Map<Path, JavaClassProcessor> processors = Map.of(
+                    mavenProjectPath.getEntityMainPath(), new EntityClassGenerator<>(javaClass, mavenProjectPath),
+                    mavenProjectPath.getServiceMainPath(), new ServiceClassGenerator<>(javaClass, mavenProjectPath),
+                    mavenProjectPath.getServiceImplMainPath() ,new ServiceImplClassGenerator<>(javaClass, mavenProjectPath),
+                    mavenProjectPath.getRepositoryMainPath(), new RepositoryClassGenerator<>(javaClass, mavenProjectPath),
+                    mavenProjectPath.getControllerMainPath(),new ControllerClassGenerator<>(javaClass, mavenProjectPath),
+                    mavenProjectPath.getControllerImplMainPath(),new ControllerImplClassGenerator<>(javaClass, mavenProjectPath)
+            );
+
+            processors.entrySet()
+                    .parallelStream()
+                    .forEach(   entry -> {
+                        Path entityMainPath = entry.getKey();
+                        JavaClassProcessor processor = entry.getValue();
+                        processor.decorate();
+                        generateFile(processor.getJavaClassSource(), entityMainPath);
+                    });
+        }
+        return javaClass;
+    }
+
+    private void generateFile(JavaSource javaClassSource, Path entityMainPath){
+        try {
+            File archivo = new File(entityMainPath.toFile().getPath() + "\\" + javaClassSource.getName() + ".java");
+            FileWriter escritor = new FileWriter(archivo);
+            escritor.write(javaClassSource.toString());
+            escritor.close();
+            System.out.println("Archivo generado correctamente en: " + archivo);
+        } catch (IOException e) {
+            System.err.println("Error al generar el archivo: " + e.getMessage());
+        }
+    }
+
+    private void generateDTOAndMapperFiles(List<JavaClass> genericJavaClasses, MavenProjectPath mavenProjectPath) {
+        for (JavaClass javaClass : genericJavaClasses) {
+            updateDTOProperties(javaClass);
+            generateDTO(javaClass, mavenProjectPath);
+            generateMapper(javaClass, mavenProjectPath);
+        }
+    }
+
+    private void generateDTO(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+        final JavaClassSource dto = Roaster.create(JavaClassSource.class);
+        DTOGenerator serviceClassDecorator = new DTOGenerator(dto, javaClass, mavenProjectPath);
+        serviceClassDecorator.decorate();
+        generateFile(serviceClassDecorator.getJavaClassSource(), mavenProjectPath.getDTOMainPath());
+    }
+
+    private void generateMapper(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+        final JavaInterfaceSource mapper = Roaster.create(JavaInterfaceSource.class);
+        MapperGenerator mapperDecorator = new MapperGenerator(mapper, javaClass, mavenProjectPath);
+        mapperDecorator.decorate();
+        generateFile(mapperDecorator.getJavaClassSource(), mavenProjectPath.getMapperMainPath());
+    }
+
+    private void updateDTOProperties(JavaClass javaClass) {
+        for (Column column : javaClass.getEntity().getColumns()) {
+            if (column.getRelation() != null && column.getRelation().getType() != null) {
+                String name = column.getProperty().getName();
+                String dtoRelationName = GeneratorUtil.concatRelationAndKeyRelation(name, "id");
+                if (column.getPropertyDTO() == null) {
+                    column.setPropertyDTO(new Property());
+                }
+                column.getPropertyDTO().setName(dtoRelationName);
+                column.getPropertyDTO().setRelationNameWithId(name + ".id");
+                column.getPropertyDTO().setType(DataTypes.LONG.getName());
+            }
+        }
+    }
+
+    private DocketField createDocketField(JavaClass javaClass) {
+        return DocketField.builder()
+                .apiName(javaClass.getApiName())
+                .name(GeneratorUtil.convertCamelToSnakeCaseLower(javaClass.getName()))
+                .camelCaseName(GeneratorUtil.convertUpperFisrtLettersAndCamelCase(javaClass.getName()))
+                .build();
+    }
+
+    private SwaggerJavaClass createSwaggerDocumentation(ProjectProperties properties, List<DocketField> docketFields) {
         DocumentationProperties documentation = properties.getDocumentation();
         if (documentation == null) {
             logger.warn("No documentation properties found, returning empty SwaggerJavaClass");
             return new SwaggerJavaClass();
         }
+
         SwaggerJavaClass documentationSwagger = new SwaggerJavaClass();
         documentationSwagger.setDescription(documentation.getDescription());
         documentationSwagger.setTitle(documentation.getTitle());
@@ -62,57 +150,7 @@ public class JavaClassGenerator {
         documentationSwagger.setTermsOfServiceUrl(documentation.getTermsOfServiceUrl());
         documentationSwagger.setDocketFields(docketFields);
 
-        //TODO por revisar si falta agregar mas
         return documentationSwagger;
-    }
-
-    private JavaClass generateJavaFiles(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        if (null != javaClass) {
-            generateEntity(javaClass, mavenProjectPath);
-            generateService(javaClass, mavenProjectPath);
-            generateServiceImpl(javaClass, mavenProjectPath);
-            generateRepository(javaClass, mavenProjectPath);
-            generateController(javaClass, mavenProjectPath);
-            generateControllerImpl(javaClass, mavenProjectPath);
-        }
-        return javaClass;
-    }
-
-
-    private void generateDTOAndMapperFile(List<JavaClass> genericJavaClasses, MavenProjectPath mavenProjectPath) {
-        for (JavaClass genericJavaClass : genericJavaClasses) {
-            for (Column column : genericJavaClass.getEntity().getColumns()) {
-                if(column.getRelation() != null && column.getRelation().getType() != null) {
-                    String name = column.getProperty().getName();
-                    String dtoRelationName= GeneratorUtil.concatRelationAndKeyRelation(name, "id");
-                    if(column.getPropertyDTO() ==  null){
-                        column.setPropertyDTO(new Property());
-                    }
-                    column.getPropertyDTO().setName(dtoRelationName);
-                    String entityRelationNameWithPrimaryKey= column.getProperty().getName().concat(".").concat("id");
-                    column.getPropertyDTO().setRelationNameWithId(entityRelationNameWithPrimaryKey);
-                    column.getPropertyDTO().setType(DataTypes.LONG.getName());
-                }
-            }
-            generateDTO(genericJavaClass, mavenProjectPath);
-            generateMapper(genericJavaClass, mavenProjectPath);
-        }
-    }
-
-    private void generateDTO(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate Service");
-        final JavaClassSource dto = Roaster.create(JavaClassSource.class);
-        DTOGenerator serviceClassDecorator = new DTOGenerator(dto, javaClass, mavenProjectPath);
-        serviceClassDecorator.decorate();
-        generateFile(serviceClassDecorator.getJavaClassSource(), mavenProjectPath.getDTOMainPath());
-    }
-
-    private void generateMapper(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate Mapper");
-        final JavaInterfaceSource mapper = Roaster.create(JavaInterfaceSource.class);
-        MapperGenerator mapperDecorator = new MapperGenerator(mapper, javaClass, mavenProjectPath);
-        mapperDecorator.decorate();
-        generateFile(mapperDecorator.getJavaClassSource(), mavenProjectPath.getMapperMainPath());
     }
 
     private void generateSwaggerConfig(SwaggerJavaClass docProperties, MavenProjectPath mavenProjectPath) {
@@ -122,74 +160,5 @@ public class JavaClassGenerator {
             swaggerGenerator.decorate();
             generateFile(swaggerGenerator.getJavaClassSource(), mavenProjectPath.getConfigMainPath());
         }
-    }
-
-
-    private void generateRepository(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate Repository");
-
-        final JavaInterfaceSource javaClassRepository = Roaster.create(JavaInterfaceSource.class);
-        JavaClassProcessor repositoryDecorator = new RepositoryClassGenerator(javaClassRepository, javaClass, mavenProjectPath);
-        repositoryDecorator.decorate();
-        print(repositoryDecorator);
-        generateFile(repositoryDecorator.getJavaClassSource(), mavenProjectPath.getRepositoryMainPath());
-    }
-
-    private void generateEntity(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate Entity");
-        final JavaClassSource javaClassEntity = Roaster.create(JavaClassSource.class);
-        JavaClassProcessor entityDecorator = new EntityClassGenerator(javaClassEntity, javaClass, mavenProjectPath);
-        entityDecorator.decorate();
-        print(entityDecorator);
-        generateFile(entityDecorator.getJavaClassSource(), mavenProjectPath.getEntityMainPath());
-    }
-
-    private void generateService(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate Service");
-        final JavaInterfaceSource service = Roaster.create(JavaInterfaceSource.class);
-        JavaClassProcessor serviceClassDecorator = new ServiceClassGenerator(service, javaClass, mavenProjectPath);
-        serviceClassDecorator.decorate();
-        generateFile(serviceClassDecorator.getJavaClassSource(), mavenProjectPath.getServiceMainPath());
-    }
-
-    private void generateServiceImpl(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate ServiceImpl");
-        final JavaClassSource javaClassEntity = Roaster.create(JavaClassSource.class);
-        JavaClassProcessor entityDecorator = new ServiceImplClassGenerator(javaClassEntity, javaClass, mavenProjectPath);
-        entityDecorator.decorate();
-        generateFile(entityDecorator.getJavaClassSource(), mavenProjectPath.getServiceImplMainPath());
-    }
-
-    private void generateController(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate Controller");
-        final JavaInterfaceSource javaInterfaceSource = Roaster.create(JavaInterfaceSource.class);
-        JavaClassProcessor controllerClassDecorator = new ControllerClassGenerator(javaInterfaceSource, javaClass, mavenProjectPath);
-        controllerClassDecorator.decorate();
-        generateFile(controllerClassDecorator.getJavaClassSource(), mavenProjectPath.getControllerMainPath());
-    }
-
-    private void generateControllerImpl(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        logger.info("Generate ControllerImpl");
-        final JavaClassSource javaClassSource = Roaster.create(JavaClassSource.class);
-        JavaClassProcessor classDecorator = new ControllerImplClassGenerator(javaClassSource, javaClass, mavenProjectPath);
-        classDecorator.decorate();
-        generateFile(classDecorator.getJavaClassSource(), mavenProjectPath.getControllerImplMainPath());
-    }
-
-    private void generateFile(JavaSource javaClassSource, Path entityMainPath){
-        try {
-            File archivo = new File(entityMainPath.toFile().getPath() + "\\" + javaClassSource.getName()+ ".java");
-            FileWriter escritor = new FileWriter(archivo);
-            escritor.write(javaClassSource.toString());
-            escritor.close();
-            System.out.println("Archivo generado correctamente en: " + archivo);
-        } catch (IOException e) {
-            System.err.println("Error al generar el archivo: " + e.getMessage());
-        }
-    }
-
-
-    public void print(JavaClassProcessor javaClassProcessor) {
-        System.out.println(javaClassProcessor.printClass());
     }
 }

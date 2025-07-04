@@ -31,7 +31,7 @@ class EntityClassDecoratorTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(javaClass.getEntity()).thenReturn(entityClass);
-        entityClassDecorator = new EntityClassGenerator<>(javaClassSource, javaClass, mavenProjectPath);
+        entityClassDecorator = new EntityClassGenerator<>(javaClass, mavenProjectPath);
     }
 
     @Test

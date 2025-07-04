@@ -11,15 +11,11 @@ import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.
 import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.UUID;
 
 @Service
 public class ProjectService implements ProjectUsesCases {
@@ -28,10 +24,12 @@ public class ProjectService implements ProjectUsesCases {
     private  ProjectRepository projectRepository;
     @Autowired
     private FileRepository fileRepository;
+    @Autowired
+    private JwtService jwtService;
 
     @Override
-    public List<Project> findAll() {
-        return projectRepository.findAll();
+    public List<Project> findAllPublic() {
+        return projectRepository.findAllPublic();
     }
 
     @Override
@@ -56,6 +54,7 @@ public class ProjectService implements ProjectUsesCases {
         byId.setUrlRepository(project.getUrlRepository());
         byId.setIsPrivate(project.getIsPrivate());
         byId.setUpdateDate(LocalDateTime.now());
+        byId.setUpdateUser(project.getUpdateUser());
         return projectRepository.save(byId);
     }
 
@@ -76,23 +75,21 @@ public class ProjectService implements ProjectUsesCases {
     }
 
     @Override
-    public StreamingResponseBody download(String id) throws IOException {
+    public InputStream download(String id) throws IOException {
         Project byId = this.findById(id);
         if (byId.getStatus() != ProjectStatus.GENERATED) {
             throw new NotFoundException("Project with id " + id + " is not generated yet.");
         }
-        List<File> files = fileRepository.downloadFolder(byId.getUrlRepository());
-        StreamingResponseBody responseBody = outputStream -> {
-            try (ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream)) {
-                for (File file : files) {
-                    String relativePath = file.getPath().substring(System.getProperty("java.io.tmpdir").length() + 1); // Obtiene la ruta relativa
-                    zipOutputStream.putNextEntry(new ZipEntry(relativePath));
-                    Files.copy(file.toPath(), zipOutputStream);
-                    zipOutputStream.closeEntry();
-                }
+
+        File zipFile = new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString() + ".zip");
+        try {
+            try (FileOutputStream fos = new FileOutputStream(zipFile)) {
+                fileRepository.downloadZip(byId.getUrlRepository()).transferTo(fos);
             }
-        };
-        return responseBody;
+        } catch (Exception e) {
+            throw new IOException("Error al descargar el archivo ZIP", e);
+        }
+        return new FileInputStream(zipFile);
     }
 
     @Override
@@ -113,5 +110,12 @@ public class ProjectService implements ProjectUsesCases {
         }
         repository = fileRepository.uploadGithub(project.getUrlRepository(), dto);
 
+    }
+
+    @Override
+    public List<Project> findByUser(String token) {
+        String extractedToken = jwtService.extractToken(token);
+        String user = jwtService.user(extractedToken);
+        return this.projectRepository.findByCreationUser(user);
     }
 }

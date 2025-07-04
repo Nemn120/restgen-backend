@@ -4,6 +4,7 @@ import es.achavez.miw.tfm.restgen.generator.application.service.generator.archet
 import es.achavez.miw.tfm.restgen.generator.domain.DataTypes;
 import es.achavez.miw.tfm.restgen.generator.domain.DirectoryLayerPath;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
+import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.source.FieldSource;
 import org.jboss.forge.roaster.model.source.JavaInterfaceSource;
 
@@ -12,8 +13,8 @@ import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.
 
 public class ServiceClassGenerator<T extends JavaInterfaceSource> extends JavaClassTemplate<T> {
 
-    public ServiceClassGenerator(T javaInterfaceSource, JavaClass JavaClass, MavenProjectPath mavenProjectPath) {
-        super(javaInterfaceSource, JavaClass, mavenProjectPath);
+    public ServiceClassGenerator(JavaClass JavaClass, MavenProjectPath mavenProjectPath) {
+        super((T) Roaster.create(JavaInterfaceSource.class), JavaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.SERVICE;
     }
 

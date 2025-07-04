@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -19,7 +20,8 @@ public class FileRepositoryImpl implements FileRepository {
 
     @Override
     public void upload(String uuid, Path projectPath) {
-        service.uploadFolder(uuid, projectPath.toFile());
+        service.uploadFolderAsZip(uuid, projectPath.toFile());
+
     }
 
     @Override
@@ -30,5 +32,10 @@ public class FileRepositoryImpl implements FileRepository {
     @Override
     public GithubRepository uploadGithub(String urlRepository, GitHubUploadDto dto) throws IOException {
         return service.uploadGithub(urlRepository, dto);
+    }
+
+    @Override
+    public InputStream downloadZip(String uuid) throws IOException {
+        return service.downloadZip(uuid);
     }
 }

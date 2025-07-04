@@ -26,7 +26,7 @@ class ControllerImplClassDecoratorTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        controllerImplClassDecorator = new ControllerImplClassGenerator<>(javaClassSource, javaClass, mavenProjectPath);
+        controllerImplClassDecorator = new ControllerImplClassGenerator<>(javaClass, mavenProjectPath);
     }
 
     @Test

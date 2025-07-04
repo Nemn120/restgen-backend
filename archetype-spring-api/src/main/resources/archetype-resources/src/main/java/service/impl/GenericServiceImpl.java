@@ -124,11 +124,11 @@ public abstract class GenericServiceImpl<E, D, I> implements GenericService<E, D
 
                 if (value != null) {
                     String fieldName = field.getName();
-                    String[] fieldParts = fieldName.split("(?<=.)(?=\\p{Lu})");  // Split camel case
+                    String[] fieldParts = fieldName.split("(?<=.)(?=\\p{Lu})");
                     String entityFieldName = String.join(".", fieldParts).toLowerCase();
 
                     if (fieldName.endsWith("Id")) {
-                        String entityReferencePath = entityFieldName.substring(0, entityFieldName.length() - 3); // Remove "id"
+                        String entityReferencePath = entityFieldName.substring(0, entityFieldName.length() - 3);
                         predicates.add(criteriaBuilder.equal(root.get(entityReferencePath).get("id"), value));
                     } else {
                         if (String.class.equals(field.getType())) {

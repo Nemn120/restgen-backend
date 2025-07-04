@@ -2,7 +2,7 @@ name: CD - GitHub Docker Packages & Deploy AWS ECS
 
 on:
   push:
-    branches: [develop]
+    branches: [main]
 
 env:
   REPOSITORY: ${{ github.repository }}
