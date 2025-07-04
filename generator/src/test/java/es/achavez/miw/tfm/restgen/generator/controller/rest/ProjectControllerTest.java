@@ -55,7 +55,7 @@ class ProjectControllerTest {
     }
 
     @Test
-    void shouldFindAll() throws Exception {
+    void shouldFindAllPublic() throws Exception {
         mockMvc.perform(get("/api/projects"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(3)));

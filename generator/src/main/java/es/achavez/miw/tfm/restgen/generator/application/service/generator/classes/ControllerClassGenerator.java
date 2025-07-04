@@ -4,6 +4,7 @@ import es.achavez.miw.tfm.restgen.generator.application.service.generator.archet
 import es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence;
 import es.achavez.miw.tfm.restgen.generator.domain.DirectoryLayerPath;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
+import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.source.JavaInterfaceSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
 
@@ -11,8 +12,8 @@ import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.
 
 public class ControllerClassGenerator<T extends JavaInterfaceSource> extends JavaClassTemplate<T> {
 
-    public ControllerClassGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        super(javaClassSource, javaClass, mavenProjectPath);
+    public ControllerClassGenerator(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+        super((T) Roaster.create(JavaInterfaceSource.class), javaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.CONTROLLER;
     }
 

@@ -52,7 +52,7 @@ public class GitHubOAuthService {
             throw new RuntimeException("Error al obtener la información del usuario de GitHub");
         }
         Map<String, Object> userInfo = userResponse.getBody();
-        userInfo.put("access_token", accessToken); // Agregar el token al mapa de respuesta
+        userInfo.put("access_token", accessToken);
 
         return userInfo;
     }

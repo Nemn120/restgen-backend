@@ -4,6 +4,7 @@ import es.achavez.miw.tfm.restgen.generator.application.service.generator.archet
 import es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence;
 import es.achavez.miw.tfm.restgen.generator.domain.DirectoryLayerPath;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
+import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.Visibility;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
@@ -12,8 +13,8 @@ import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.
 
 public class ControllerImplClassGenerator<T extends JavaClassSource> extends JavaClassTemplate<T> {
 
-    public ControllerImplClassGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        super(javaClassSource, javaClass, mavenProjectPath);
+    public ControllerImplClassGenerator(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+        super((T) Roaster.create(JavaClassSource.class), javaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.CONTROLLER_IMPL;
     }
 

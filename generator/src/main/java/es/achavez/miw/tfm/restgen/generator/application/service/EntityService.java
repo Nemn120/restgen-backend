@@ -5,6 +5,7 @@ import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectReposito
 import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.PlantUmlDiagramGenerator;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
+import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.mapper.EntityRestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,8 @@ public class EntityService implements EntityUsesCases {
     private ProjectRepository projectRepository;
     @Autowired
     private PlantUmlDiagramGenerator plantUmlDiagramGenerator;
+    @Autowired
+    private EntityRestMapper entityRestMapper;
 
 
     @Override
@@ -34,17 +37,20 @@ public class EntityService implements EntityUsesCases {
     @Override
     public JavaClass saveOrUpdate(String projectId, JavaClass javaClass) {
         return projectRepository.findById(projectId).map(project -> {
-            List<JavaClass> updatedClasses = new ArrayList<>(project.getClasses().stream()
-                    .map(existingClass -> {
-                        if (existingClass.getName().equals(javaClass.getName())) {
-                            return javaClass;
-                        }
-                        return existingClass;
-                    }).toList());
+            boolean exists = false;
+            List<JavaClass> updatedClasses = new ArrayList<>();
+            if(project.getClasses() != null){
+                updatedClasses = new ArrayList<>(project.getClasses().stream()
+                        .map(existingClass -> {
+                            if (existingClass.getName().equals(javaClass.getName())) {
+                                return javaClass;
+                            }
+                            return existingClass;
+                        }).toList());
 
-            boolean exists = updatedClasses.stream()
-                    .anyMatch(updatedClass -> updatedClass.getName().equals(javaClass.getName()));
-
+                exists = updatedClasses.stream()
+                        .anyMatch(updatedClass -> updatedClass.getName().equals(javaClass.getName()));
+            }
             if (!exists) {
                 updatedClasses.add(javaClass);
             }

@@ -27,7 +27,7 @@ public abstract class JavaClassTemplate<T extends JavaSource> implements JavaCla
 
     @Override
     public void decorate() {
-        logger.info("decorate: decorando: "+ this.getClass().getSimpleName());
+        logger.info("JavaClassTemplate: decorate "+ this.getClass().getSimpleName());
         addPackageClass();
     }
 
@@ -48,9 +48,7 @@ public abstract class JavaClassTemplate<T extends JavaSource> implements JavaCla
     }
 
     protected void addImport(DirectoryLayerPath layerPath) {
-
         PackageDirectoryLayer layer = packageDirectory.getLayer(layerPath);
-        logger.info("addImport: Agregando importación "+ layer.getImportPath());
         getJavaClassSource().addImport(layer.getImportPath());
     }
 

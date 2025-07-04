@@ -5,6 +5,7 @@ import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface FileRepository {
     List<File> downloadFolder(String uuid) throws IOException;
 
     GithubRepository uploadGithub(String urlRepository, GitHubUploadDto dto) throws IOException;
+
+    InputStream downloadZip(String uuid) throws IOException;
+
 }

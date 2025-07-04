@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jboss.forge.roaster.Roaster;
 import org.jboss.forge.roaster.model.Visibility;
 import org.jboss.forge.roaster.model.source.AnnotationSource;
 import org.jboss.forge.roaster.model.source.FieldSource;
@@ -26,8 +27,8 @@ public class EntityClassGenerator<T extends JavaClassSource> extends JavaClassTe
     private EntityClass entityClass;
     private OptionsEntity options;
 
-    public EntityClassGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
-        super(javaClassSource, javaClass, mavenProjectPath);
+    public EntityClassGenerator(JavaClass javaClass, MavenProjectPath mavenProjectPath) {
+        super((T) Roaster.create(JavaClassSource.class), javaClass, mavenProjectPath);
         this.directoryLayerPath = DirectoryLayerPath.ENTITY;
     }
 

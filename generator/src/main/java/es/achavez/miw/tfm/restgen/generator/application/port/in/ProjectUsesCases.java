@@ -2,14 +2,14 @@ package es.achavez.miw.tfm.restgen.generator.application.port.in;
 
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.GitHubUploadDto;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public interface ProjectUsesCases {
 
-    List<Project> findAll();
+    List<Project> findAllPublic();
 
     Project findById(String id);
 
@@ -21,9 +21,11 @@ public interface ProjectUsesCases {
 
     String cloneProject(String id);
 
-    StreamingResponseBody download(String id) throws IOException;
+    InputStream download(String id) throws IOException;
 
     Project findDiagramPlantUmlById(String id);
 
     void uploadToGitHub(String projectId, GitHubUploadDto dto) throws IOException;
+
+    List<Project> findByUser(String token);
 }
