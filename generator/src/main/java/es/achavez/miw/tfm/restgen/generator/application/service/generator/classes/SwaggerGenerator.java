@@ -4,6 +4,7 @@ import es.achavez.miw.tfm.restgen.generator.application.service.generator.archet
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.directory.PackageDirectory;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.directory.PackageDirectoryLayer;
 import es.achavez.miw.tfm.restgen.generator.domain.*;
+import io.swagger.v3.oas.models.info.License;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.*;
@@ -55,6 +56,7 @@ public class SwaggerGenerator {
     }
 
     private void addSecuritySchemeAnnotation() {
+        javaClassSource.addImport(SECURITY_SCHEME.getPackageName());
         javaClassSource.addAnnotation("SecurityScheme")
                 .setLiteralValue("type", "SecuritySchemeType.HTTP")
                 .setLiteralValue("in", "SecuritySchemeIn.DEFAULT")
@@ -87,7 +89,17 @@ public class SwaggerGenerator {
     }
 
     private void addApiInfoMethod(SwaggerJavaClass entityClass) {
-        StringBuilder infoBuilder = new StringBuilder("return new OpenAPI()\n")
+        StringBuilder infoBuilder = new StringBuilder();
+        if(entityClass.getLicense() != null || entityClass.getLicenseUrl() != null) {
+            getJavaClassSource().addImport(License.class);
+            infoBuilder.append("License license = new License();\n");
+            if(entityClass.getLicense() != null)
+                infoBuilder.append("license.setName(\"").append(entityClass.getLicense()).append("\");\n");
+            if(entityClass.getLicenseUrl() != null){
+                infoBuilder.append("license.setUrl(\"").append(entityClass.getLicenseUrl()).append("\");\n");
+            }
+        }
+        infoBuilder.append("return new OpenAPI()\n")
                 .append("        .info(new Info()\n")
                 .append("            .title(\"").append(entityClass.getTitle()).append("\")\n")
                 .append("            .description(\"").append(entityClass.getDescription()).append("\")\n");
@@ -95,11 +107,8 @@ public class SwaggerGenerator {
         if (entityClass.getVersion() != null) {
             infoBuilder.append("            .version(\"").append(entityClass.getVersion()).append("\")\n");
         }
-        if (entityClass.getLicense() != null) {
-            infoBuilder.append("            .license(\"").append(entityClass.getLicense()).append("\")\n");
-        }
-        if (entityClass.getLicenseUrl() != null) {
-            infoBuilder.append("            .licenseUrl(\"").append(entityClass.getLicenseUrl()).append("\")\n");
+        if (entityClass.getLicense() != null || entityClass.getLicenseUrl() != null) {
+            infoBuilder.append("            .license(license)\n");
         }
         if (entityClass.getTermsOfServiceUrl() != null) {
             infoBuilder.append("            .termsOfService(\"").append(entityClass.getTermsOfServiceUrl()).append("\")\n");

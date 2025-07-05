@@ -42,6 +42,7 @@ public class ProjectService implements ProjectUsesCases {
     public Project save(Project project) {
         project.setStatus(ProjectStatus.CREATED);
         project.setCreationDate(LocalDateTime.now());
+        project.setUpdateDate(LocalDateTime.now());
         return projectRepository.save(project);
     }
 
@@ -64,14 +65,23 @@ public class ProjectService implements ProjectUsesCases {
     }
 
     @Override
-    public String cloneProject(String id) {
+    public String cloneProject(String token, String id) {
         Project project = this.findById(id);
         if (project.getStatus() != ProjectStatus.GENERATED) {
             throw new NotFoundException("Project with id " + id + " is not generated yet.");
         }
+        String extractedToken = jwtService.extractToken(token);
+        String user = jwtService.user(extractedToken);
+
         Project clonedProject = project.clone();
-        Project save = this.save(clonedProject);
-        return save.getId();
+        clonedProject.setStatus(ProjectStatus.CLONED);
+        clonedProject.setIsPrivate(Boolean.TRUE);
+        clonedProject.setUpdateUser(user);
+        clonedProject.setCreationUser(user);
+        clonedProject.setCreationDate(LocalDateTime.now());
+        clonedProject.setUpdateDate(LocalDateTime.now());
+        Project cloned = projectRepository.save(clonedProject);
+        return cloned.getId();
     }
 
     @Override

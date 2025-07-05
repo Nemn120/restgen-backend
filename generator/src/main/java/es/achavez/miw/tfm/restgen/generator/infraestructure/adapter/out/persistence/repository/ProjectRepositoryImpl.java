@@ -4,6 +4,7 @@ import es.achavez.miw.tfm.restgen.generator.application.port.out.ProjectReposito
 import es.achavez.miw.tfm.restgen.generator.application.service.exceptions.NotFoundException;
 import es.achavez.miw.tfm.restgen.generator.domain.JavaClass;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
+import es.achavez.miw.tfm.restgen.generator.domain.ProjectStatus;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.ProjectDocument;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.mapper.ProjectMongoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +41,7 @@ public class ProjectRepositoryImpl implements ProjectRepository {
 
     @Override
     public List<Project> findAllPublic() {
-        return mongoProjectRepository.findByIsPrivate(Boolean.FALSE).stream()
+        return mongoProjectRepository.findByIsPrivateAndStatus(Boolean.FALSE, ProjectStatus.GENERATED).stream()
                 .map(projectMapper::toDomain)
                 .collect(Collectors.toList());
     }

@@ -1,16 +1,13 @@
 package es.achavez.miw.tfm.restgen.generator.application.service.generator.classes;
 
+import es.achavez.miw.tfm.restgen.generator.application.service.generator.GeneratorUtil;
 import es.achavez.miw.tfm.restgen.generator.application.service.generator.archetype.MavenProjectPath;
 import es.achavez.miw.tfm.restgen.generator.domain.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 
 import static es.achavez.miw.tfm.restgen.generator.domain.AnnotationPersistence.AUDITABLE_ENTITY;
 
 public class DTOGenerator<T extends JavaClassSource> extends JavaClassTemplate<T> {
-
-    private static final Logger logger = LogManager.getLogger(EntityClassGenerator.class);
 
     public DTOGenerator(T javaClassSource, JavaClass javaClass, MavenProjectPath mavenProjectPath) {
         super(javaClassSource, javaClass, mavenProjectPath);
@@ -27,8 +24,7 @@ public class DTOGenerator<T extends JavaClassSource> extends JavaClassTemplate<T
         addAnnotationAndImport(AnnotationPersistence.LOMBOK_GETTER);
         addAnnotationAndImport(AnnotationPersistence.LOMBOK_SETTER);
 
-        //getJavaClassSource().setSuperType("AuditableDTO<" + primaryKeyType + ">");
-        addExtendsWithoutPackage(AnnotationPersistence.AUDITABLE_DTO);
+        addExtendsAuditableEntity();
 
         for (Column column : javaClass.getEntity().getColumns()) {
             if (column.getPropertyDTO() != null) {
@@ -47,12 +43,14 @@ public class DTOGenerator<T extends JavaClassSource> extends JavaClassTemplate<T
                         .setPrivate();
             }
         }
-        //addExtendsAuditableEntity();
     }
 
     private void addExtendsAuditableEntity() {
         EntityClass entityClass = javaClass.getEntity();
-        if(AUDITABLE_ENTITY.name().equals(entityClass.getExtendsClass())){
+        if(entityClass.getExtendsClass() != null && !AUDITABLE_ENTITY.name().equals(entityClass.getExtendsClass())){
+            String DTOExtends = GeneratorUtil.snakeCaseToUpperCamelCase(entityClass.getExtendsClass()).concat("DTO");
+            getJavaClassSource().setSuperType(DTOExtends);
+        }else{
             addExtendsWithoutPackage(AnnotationPersistence.AUDITABLE_DTO);
         }
     }

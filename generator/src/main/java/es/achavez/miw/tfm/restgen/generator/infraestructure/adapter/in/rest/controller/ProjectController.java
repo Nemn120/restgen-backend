@@ -77,9 +77,11 @@ public class ProjectController {
         return ResponseEntity.ok("Project generated");
     }
 
-    @GetMapping("/clone")
-    public ResponseEntity<ProjectIdDTO> clone(@RequestBody ProjectIdDTO id) {
-        String idProject = projectUsesCases.cloneProject(id.id());
+    @GetMapping("/{id}/clone")
+    public ResponseEntity<ProjectIdDTO> clone(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String id) {
+        String idProject = projectUsesCases.cloneProject(token, id);
         ProjectIdDTO projectIdDTO = new ProjectIdDTO(idProject);
         return ResponseEntity.ok(projectIdDTO);
     }

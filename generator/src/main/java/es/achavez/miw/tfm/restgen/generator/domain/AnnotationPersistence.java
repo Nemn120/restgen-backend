@@ -45,6 +45,9 @@ public enum AnnotationPersistence {
     PUT_MAPPING("PutMapping", "org.springframework.web.bind.annotation.PutMapping"),
     DELETE_MAPPING("DeleteMapping", "org.springframework.web.bind.annotation.DeleteMapping"),
 
+    PATH_VARIABLE("PathVariable", "org.springframework.web.bind.annotation.PathVariable"),
+    REQUEST_BODY("RequestBody", "org.springframework.web.bind.annotation.RequestBody"),
+
     OPERATION("Operation", "io.swagger.v3.oas.annotations.Operation"),
     SECURITY_REQUIREMENT("SecurityRequirement", "io.swagger.v3.oas.annotations.security.SecurityRequirement"),
     SORT("Sort", "org.springframework.data.domain.Sort"),

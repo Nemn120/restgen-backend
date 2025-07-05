@@ -267,7 +267,7 @@ public class EntityClassGenerator<T extends JavaClassSource> extends JavaClassTe
         if (StringUtils.isNotBlank(columnDefinition.getName())) {
             annotation.setStringValue("name", columnDefinition.getName());
         } else {
-            annotation.setStringValue("name", "ID_" + GeneratorUtil.convertCamelToSnakeCaseUpper(column.getProperty().getName()));
+            annotation.setStringValue("name", GeneratorUtil.convertCamelToSnakeCaseUpper(column.getProperty().getName()));
         }
     }
 

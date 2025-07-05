@@ -46,7 +46,14 @@ public class ControllerImplClassGenerator<T extends JavaClassSource> extends Jav
         getJavaClassSource().addImport("org.springframework.data.domain.PageRequest");
         getJavaClassSource().addImport("org.springframework.data.domain.Pageable");
 
-        addImport(BIN_ANNOTATION);
+        addImport(GET_MAPPING);
+        addImport(DELETE_MAPPING);
+        addImport(POST_MAPPING);
+        addImport(PUT_MAPPING);
+
+        addImport(PATH_VARIABLE);
+        addImport(REQUEST_BODY);
+
         addImport(DirectoryLayerPath.SERVICE);
         addImport(DirectoryLayerPath.DTO);
 
@@ -73,13 +80,12 @@ public class ControllerImplClassGenerator<T extends JavaClassSource> extends Jav
         generateSearchMethod(dtoName);
     }
 
-
     private void generateFindByIdMethod(String dtoName) {
         MethodSource<JavaClassSource> method = getJavaClassSource().addMethod();
         method.setName("findById");
         method.setReturnType("ResponseEntity<GenericResponse<" + dtoName + ">>");
         method.setVisibility(Visibility.PUBLIC);
-        method.addAnnotation(AnnotationPersistence.GET_MAPPING.getAnnotationName());
+        method.addAnnotation(GET_MAPPING.getAnnotationName()).setStringValue("/{id}");
         method.addParameter("Long id", "").addAnnotation("PathVariable");
         method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: findById()\");\n" +
                        dtoName + " dto = service.findById(id);\n" +
@@ -114,7 +120,7 @@ public class ControllerImplClassGenerator<T extends JavaClassSource> extends Jav
         method.setName("update");
         method.setReturnType("ResponseEntity<GenericResponse<" + dtoName + ">>");
         method.setVisibility(Visibility.PUBLIC);
-        method.addAnnotation(AnnotationPersistence.PUT_MAPPING.getAnnotationName());
+        method.addAnnotation(AnnotationPersistence.PUT_MAPPING.getAnnotationName()).setStringValue("/{id}");
         method.addParameter("Long id", "").addAnnotation("PathVariable");
         method.addParameter(dtoName + " obj", "").addAnnotation("RequestBody");
         method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: update()\");\n" +
@@ -128,7 +134,7 @@ public class ControllerImplClassGenerator<T extends JavaClassSource> extends Jav
         method.setName("delete");
         method.setReturnType("ResponseEntity<Void>");
         method.setVisibility(Visibility.PUBLIC);
-        method.addAnnotation(AnnotationPersistence.DELETE_MAPPING.getAnnotationName());
+        method.addAnnotation(AnnotationPersistence.DELETE_MAPPING.getAnnotationName()).setStringValue("/{id}");
         method.addParameter("Long id", "").addAnnotation("PathVariable");
         method.setBody("logger.info(\"call " + getJavaClassSource().getName() + " :: delete()\");\n" +
                        "service.delete(id);\n" +

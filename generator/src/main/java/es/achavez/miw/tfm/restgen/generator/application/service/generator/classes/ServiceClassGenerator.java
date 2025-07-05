@@ -22,7 +22,8 @@ public class ServiceClassGenerator<T extends JavaInterfaceSource> extends JavaCl
     public void decorate() {
         super.decorate();
         String camelCaseName = packageDirectory.getNameClassLayer(DirectoryLayerPath.ENTITY);
-        getJavaClassSource().setName(packageDirectory.getNameClassLayer(DirectoryLayerPath.SERVICE));
+        String nameClassLayer = packageDirectory.getNameClassLayer(DirectoryLayerPath.SERVICE);
+        getJavaClassSource().setName(nameClassLayer);
         getJavaClassSource().addInterface(GENERIC_SERVICE.getAnnotationName() +
                                           "<" +
                                           camelCaseName +
@@ -35,8 +36,8 @@ public class ServiceClassGenerator<T extends JavaInterfaceSource> extends JavaCl
         addImport(DirectoryLayerPath.ENTITY);
         addImport(DirectoryLayerPath.DTO);
 
-        String upperCase = camelCaseName.substring(1);
-        char charAt = camelCaseName.charAt(0);
+        String upperCase = nameClassLayer.substring(1);
+        char charAt = nameClassLayer.charAt(0);
         String initLetter = String.valueOf(charAt).toLowerCase();
         FieldSource<JavaInterfaceSource> fieldSource = getJavaClassSource().addField();
         fieldSource.setType(String.class);
@@ -44,10 +45,4 @@ public class ServiceClassGenerator<T extends JavaInterfaceSource> extends JavaCl
         fieldSource.setStringInitializer(initLetter.concat(upperCase));
 
     }
-
-  /*  @Override
-    protected void addPackageClass() {
-        PackageDirectoryLayer layer = packageDirectory.getLayer(DirectoryLayerPath.SERVICE);
-        getJavaClassSource().setPackage(layer.getPackagePath());
-    }*/
 }

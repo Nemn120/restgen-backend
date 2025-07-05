@@ -56,17 +56,20 @@ public class UserService implements UserUsesCases {
     public UserDto getUserGithub(String code, String state) {
 
         Map<String, Object> userInfo = gitHubOAuthService.getUserInfo(code, state);
-        String email = userInfo.get("email").toString();
+        String email;
+        if(userInfo.get("email") != null && !userInfo.get("email").toString().isEmpty()) {
+            email = (String) userInfo.get("email");
+        } else {
+            email = userInfo.get("login").toString();
+        }
         String name = userInfo.get("name").toString();
         UserDto userDto = new UserDto();
         userDto.setEmail(email);
         userDto.setRole(Role.DEVELOPER);
-        System.out.println(userInfo.get("created_at"));
         String tokenGithub = userInfo.get("access_token").toString();
-        //userDto.setCreateDate();
         this.verifyTokenScopes(tokenGithub);
         userDto.setName(name);
-        userDto.setToken(jwtUsesCases.createToken(email, email, Role.DEVELOPER.name(), tokenGithub));
+        userDto.setToken(jwtUsesCases.createToken(email, name, Role.DEVELOPER.name(), tokenGithub));
         return userDto;
     }
 
@@ -88,7 +91,6 @@ public class UserService implements UserUsesCases {
         );
 
         List<String> scopes = response.getHeaders().get("X-OAuth-Scopes");
-        System.out.println(scopes);
         if (scopes == null || !scopes.contains("repo")) {
             throw new RuntimeException("El token no tiene el scope 'repo'.");
         }

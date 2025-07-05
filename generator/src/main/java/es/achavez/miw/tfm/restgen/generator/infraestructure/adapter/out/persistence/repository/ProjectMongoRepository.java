@@ -1,5 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.repository;
 
+import es.achavez.miw.tfm.restgen.generator.domain.ProjectStatus;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.out.persistence.document.ProjectDocument;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -13,5 +14,5 @@ public interface ProjectMongoRepository extends MongoRepository<ProjectDocument,
 
     List<ProjectDocument> findByCreationUser(String user);
 
-    List<ProjectDocument> findByIsPrivate(Boolean isPrivate);
+    List<ProjectDocument> findByIsPrivateAndStatus(Boolean aFalse, ProjectStatus projectStatus);
 }

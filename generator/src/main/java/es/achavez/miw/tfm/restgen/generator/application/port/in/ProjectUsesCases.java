@@ -19,7 +19,7 @@ public interface ProjectUsesCases {
 
     void deleteById(String id);
 
-    String cloneProject(String id);
+    String cloneProject(String token, String id);
 
     InputStream download(String id) throws IOException;
 
