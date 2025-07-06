@@ -61,6 +61,7 @@ public class GenerateArchetype {
         command.add("-Dversion=" + mavenProjectPath.getMavenPropertiesArchetype().getVersion());
         command.add("-DappName=" + mavenProjectPath.getMavenPropertiesArchetype().getAppName());
         command.add("-DbasePath=" + mavenProjectPath.getMavenPropertiesArchetype().getBasePath());
+        command.add("-DsecretKey=" + mavenProjectPath.getMavenPropertiesArchetype().getSecretKey());
 
         if (mavenProjectPath.getMavenPropertiesArchetype().getPort() != null) {
             command.add("-Dport=" + mavenProjectPath.getMavenPropertiesArchetype().getPort());
@@ -75,23 +76,4 @@ public class GenerateArchetype {
         if (path.toFile().exists())
             FileUtils.cleanDirectory(path.toFile());
     }
-
-    public static void main(String[] args) {
-        MavenPropertiesArchetype mavenPropertiesArchetype = new MavenPropertiesArchetype(
-                "com.fchavez.archetype.api",
-                "generate-spring-api",
-                "1.0.0",
-                "MyApp",
-                "/base/path",
-                8080
-        );
-        MavenProjectPath mavenProjectPath = new MavenProjectPath(Path.of("generate"), mavenPropertiesArchetype);
-        GenerateArchetype generateArchetype = new GenerateArchetype(mavenProjectPath);
-        try {
-            generateArchetype.createProjectFromArchetype(Path.of("generate"));
-        } catch (IOException e) {
-            LOG.error("Error creating project from archetype: ", e);
-        }
-    }
-
 }

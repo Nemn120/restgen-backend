@@ -65,9 +65,9 @@ public class PlantUmlDiagramGenerator {
                 relation != null && isValidRelationType(relation)) {
                 switch (relation.getType()) {
                     case Relation.ONE_TO_ONE -> relations.append(entity.getName())
-                            .append(" -down-> ").append(field.getProperty().getType()).append("\n");
+                            .append(" *-down-> ").append(field.getProperty().getType()).append("\n");
                     case Relation.MANY_TO_ONE -> relations.append(entity.getName())
-                            .append(" -down-> \"0..*\" ").append(field.getProperty().getType()).append("\n");
+                            .append(" -down-> ").append(field.getProperty().getType()).append("\n");
                 }
             }
         }

@@ -12,13 +12,17 @@ public class MavenPropertiesArchetype {
     private String appName;
     private String basePath;
     private Integer port;
+    private String secretKey;
 
-    public MavenPropertiesArchetype(String groupId, String artifactId, String version, String appName, String basePath, Integer port) {
+    public MavenPropertiesArchetype(
+            String groupId, String artifactId, String version,
+            String appName, String basePath, Integer port, String secretKey) {
         this.groupId = groupId;
         this.artifactId = artifactId;
         this.version = version;
         this.appName = appName;
         this.basePath = basePath;
         this.port = port;
+        this.secretKey = secretKey;
     }
 }

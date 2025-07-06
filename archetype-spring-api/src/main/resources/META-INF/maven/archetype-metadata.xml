@@ -9,6 +9,7 @@
 		<requiredProperty key="appName"/>
 		<requiredProperty key="basePath"/>
 		<requiredProperty key="port"/>
+		<requiredProperty key="secretKey"/>
 	</requiredProperties>
 
 	<fileSets>

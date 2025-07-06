@@ -82,13 +82,14 @@ public class GeneratorService implements GeneratorUsesCases {
         ProjectProperties properties = project.getProperties();
         MavenProperties mavenProperties = properties.getMaven();
         ApplicationProperties applicationProperties = properties.getApplication();
-
+        SecurityProperties securityProperties = properties.getSecurity();
         String groupId = mavenProperties.getGroupId();
         String artifactId = mavenProperties.getArtifactId();
         String version = mavenProperties.getVersion();
         Integer port = applicationProperties.getPort();
         String basePath = applicationProperties.getBasePath();
         String name = project.getName();
-        return new MavenPropertiesArchetype(groupId, artifactId, version, name, basePath, port);
+        String secretKey = securityProperties.getSecretKey();
+        return new MavenPropertiesArchetype(groupId, artifactId, version, name, basePath, port, secretKey);
     }
 }
