@@ -4,6 +4,7 @@ import es.achavez.miw.tfm.restgen.generator.application.port.out.FileRepository;
 import es.achavez.miw.tfm.restgen.generator.domain.GithubRepository;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.GitHubUploadDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Repository
 public class FileRepositoryImpl implements FileRepository {
@@ -21,7 +23,9 @@ public class FileRepositoryImpl implements FileRepository {
     @Override
     public void upload(String uuid, Path projectPath) {
         service.uploadFolderAsZip(uuid, projectPath.toFile());
-
+        CompletableFuture.runAsync(() -> {
+            service.uploadFolder(uuid, projectPath.toFile());
+        });
     }
 
     @Override

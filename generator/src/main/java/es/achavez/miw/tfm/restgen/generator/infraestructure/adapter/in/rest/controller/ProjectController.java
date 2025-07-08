@@ -7,13 +7,13 @@ import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.mapper.ProjectRestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -54,7 +54,8 @@ public class ProjectController {
     public ResponseEntity<?> create(@RequestBody ProjectRequestDTO projectDTO) {
         Project project = projectMapper.mapCreateToDomain(projectDTO);
         Project savedProject = projectUsesCases.save(project);
-        return ResponseEntity.created(URI.create(API_PROJECTS + savedProject.getId())).build();
+        ProjectIdDTO projectIdDTO = new ProjectIdDTO(savedProject.getId());
+        return new ResponseEntity<>(projectIdDTO,HttpStatusCode.valueOf(201));
     }
 
     @PutMapping("/{id}")
@@ -116,14 +117,13 @@ public class ProjectController {
     }
 
     @PostMapping("/upload/{projectId}")
-    public ResponseEntity<String> uploadProjectToGitHub(
+    public ResponseEntity<?> uploadProjectToGitHub(
             @PathVariable String projectId,
             @RequestBody GitHubUploadDto dto) {
         try {
-            projectUsesCases.uploadToGitHub(projectId, dto);
-            return ResponseEntity.ok("Proyecto subido exitosamente a GitHub.");
+            return ResponseEntity.ok(projectUsesCases.uploadToGitHub(projectId, dto));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al subir el proyecto: " + e.getMessage());
+            return ResponseEntity.status(500).body("Error al subir");
         }
     }
 }

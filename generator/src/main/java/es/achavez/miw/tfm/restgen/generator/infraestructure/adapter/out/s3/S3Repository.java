@@ -38,6 +38,9 @@ public class S3Repository {
     @Value("${aws.s3.bucket}")
     private String bucketName;
 
+    @Value("${aws.s3.bucket-zip}")
+    private String bucketNameZip;
+
     public S3Repository(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
     }
@@ -53,7 +56,7 @@ public class S3Repository {
             e.printStackTrace();
         }
         long endTime = System.currentTimeMillis();
-        logger.info("Tiempo total de subida a S3: " + (endTime - startTime) + " ms");
+        logger.info("Directorio subido: Tiempo total de subida a S3: " + (endTime - startTime) + " ms");
     }
 
     private void uploadFolderRecursive(String uuid, File folder, String parentPath) {
@@ -90,12 +93,12 @@ public class S3Repository {
             throw new RuntimeException(e);
         }
         long startTime = System.currentTimeMillis();
-        PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(bucketName, uuid + ".zip", zipFile));
+        PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(bucketNameZip, uuid + ".zip", zipFile));
         if (putObjectResult == null) {
             throw new RuntimeException("Failed to upload ZIP file: " + zipFile.getName());
         }
         long endTime = System.currentTimeMillis();
-        logger.info("Tiempo total de subida del ZIP a S3: " + (endTime - startTime) + " ms");
+        logger.info("Zip subido: Tiempo total de subida del ZIP a S3: " + (endTime - startTime) + " ms");
         zipFile.delete();
     }
 
@@ -227,6 +230,8 @@ public class S3Repository {
         String jsonBody = objectMapper.writeValueAsString(requestBody);
 
         connection.getOutputStream().write(jsonBody.getBytes());
+        System.out.println(connection.getResponseMessage());
+        System.out.println(connection.getResponseCode());
         if (connection.getResponseCode() != 201) {
             throw new IOException("Error al crear el repositorio en GitHub: " + connection.getResponseMessage());
         }
@@ -251,7 +256,7 @@ public class S3Repository {
     }
 
     public InputStream downloadZip(String uuid) throws IOException {
-        S3Object s3Object = amazonS3.getObject(new GetObjectRequest(bucketName, uuid + ".zip"));
+        S3Object s3Object = amazonS3.getObject(new GetObjectRequest(bucketNameZip, uuid + ".zip"));
         InputStream inputStream = s3Object.getObjectContent();
         if (inputStream == null) {
             throw new FileNotFoundException("File not found in S3: " + uuid + ".zip");

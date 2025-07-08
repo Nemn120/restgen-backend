@@ -108,18 +108,18 @@ public class ProjectService implements ProjectUsesCases {
     }
 
     @Override
-    public void uploadToGitHub(String projectId, GitHubUploadDto dto) throws IOException {
+    public GithubRepository uploadToGitHub(String projectId, GitHubUploadDto dto) throws IOException {
         Project project = this.findById(projectId);
         if (project.getStatus() != ProjectStatus.GENERATED) {
             throw new IllegalArgumentException("El proyecto no está generado.");
         }
-
-        GithubRepository repository;
         if(project.getGithubRepository() == null || StringUtils.isBlank(project.getGithubRepository().getUrl())){
 
         }
-        repository = fileRepository.uploadGithub(project.getUrlRepository(), dto);
-
+        GithubRepository repository = fileRepository.uploadGithub(project.getUrlRepository(), dto);
+        project.setGithubRepository(repository);
+        projectRepository.save(project);
+        return repository;
     }
 
     @Override

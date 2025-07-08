@@ -1,5 +1,6 @@
 package es.achavez.miw.tfm.restgen.generator.application.port.in;
 
+import es.achavez.miw.tfm.restgen.generator.domain.GithubRepository;
 import es.achavez.miw.tfm.restgen.generator.domain.Project;
 import es.achavez.miw.tfm.restgen.generator.infraestructure.adapter.in.rest.dto.GitHubUploadDto;
 
@@ -25,7 +26,7 @@ public interface ProjectUsesCases {
 
     Project findDiagramPlantUmlById(String id);
 
-    void uploadToGitHub(String projectId, GitHubUploadDto dto) throws IOException;
+    GithubRepository uploadToGitHub(String projectId, GitHubUploadDto dto) throws IOException;
 
     List<Project> findByUser(String token);
 }
